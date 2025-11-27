@@ -1,0 +1,211 @@
+{
+  "countries": ["Australia", "France", "Italy"],
+  "scenarios": {
+    "pooled": "All Outbreaks (Pooled Data)",
+    "mild": "Mild Outbreak",
+    "severe": "Severe Outbreak"
+  },
+  "attributes": {
+    "scope": {
+      "label": "Scope",
+      "options": {
+        "reference": "High-risk only",
+        "all": "All occupations & public spaces"
+      },
+      "reference": "reference"
+    },
+    "exemption": {
+      "label": "Exemptions",
+      "options": {
+        "reference": "Medical only",
+        "medRel": "Medical + religious",
+        "broad": "Broad (medical, religious, personal)"
+      },
+      "reference": "reference"
+    },
+    "coverage": {
+      "label": "Coverage Target",
+      "options": {
+        "reference": "50%",
+        "70": "70% vaccinated",
+        "90": "90% vaccinated"
+      },
+      "reference": "reference"
+    },
+    "livesSaved": {
+      "label": "Estimated Lives Saved (per 100k)",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 25
+    }
+  },
+  "coefficientSets": {
+    "Australia_pooled": {
+      "ASC_mean": 0.3785458,
+      "ASC_optout": 1.067346,
+      "scope2": -0.094717,
+      "exemption2": -0.052939,
+      "exemption3": -0.1479027,
+      "coverage2": 0.0929465,
+      "coverage3": 0.0920977,
+      "lives": 0.0445604
+    },
+    "Australia_mild": {
+      "ASC_mean": 0.3510644,
+      "ASC_optout": 0.9855033,
+      "scope2": -0.1689361,
+      "exemption2": -0.0376554,
+      "exemption3": -0.1753159,
+      "coverage2": 0.1245323,
+      "coverage3": 0.0662936,
+      "lives": 0.0412682
+    },
+    "Australia_severe": {
+      "ASC_mean": 0.4071363,
+      "ASC_optout": 1.154312,
+      "scope2": -0.0204815,
+      "exemption2": -0.0681409,
+      "exemption3": -0.1219056,
+      "coverage2": 0.0610344,
+      "coverage3": 0.116988,
+      "lives": 0.0480637
+    },
+    "France_pooled": {
+      "ASC_mean": 0.4762531,
+      "ASC_optout": 0.890991,
+      "scope2": -0.1997912,
+      "exemption2": -0.1602495,
+      "exemption3": -0.1598304,
+      "coverage2": 0.1042234,
+      "coverage3": 0.1853611,
+      "lives": 0.0354086
+    },
+    "France_mild": {
+      "ASC_mean": 0.475491,
+      "ASC_optout": 0.8976869,
+      "scope2": -0.3370007,
+      "exemption2": -0.1804065,
+      "exemption3": -0.0801147,
+      "coverage2": 0.0828582,
+      "coverage3": 0.1469198,
+      "lives": 0.0356382
+    },
+    "France_severe": {
+      "ASC_mean": 0.4688305,
+      "ASC_optout": 0.9124775,
+      "scope2": -0.0921159,
+      "exemption2": -0.153538,
+      "exemption3": -0.2389202,
+      "coverage2": 0.1252384,
+      "coverage3": 0.2183836,
+      "lives": 0.0365768
+    },
+    "Italy_pooled": {
+      "ASC_mean": 0.4706899,
+      "ASC_optout": 1.035048,
+      "scope2": -0.0387768,
+      "exemption2": -0.0714253,
+      "exemption3": -0.2632533,
+      "coverage2": 0.2353087,
+      "coverage3": 0.1710044,
+      "lives": 0.0282736
+    },
+    "Italy_mild": {
+      "ASC_mean": 0.3779783,
+      "ASC_optout": 0.8981869,
+      "scope2": -0.1269707,
+      "exemption2": -0.0684358,
+      "exemption3": -0.2981549,
+      "coverage2": 0.1762131,
+      "coverage3": 0.092999,
+      "lives": 0.0254054
+    },
+    "Italy_severe": {
+      "ASC_mean": 0.5630024,
+      "ASC_optout": 1.17989,
+      "scope2": 0.0488642,
+      "exemption2": -0.0745568,
+      "exemption3": -0.2319571,
+      "coverage2": 0.2970621,
+      "coverage3": 0.2517552,
+      "lives": 0.0313944
+    }
+  },
+  "wtsDataSets": {
+    "Australia_pooled": {
+      "scope2":    { "wts":  2.125585,  "se": 0.9888284, "p": 0.032 },
+      "exemption2":{ "wts":  1.188027,  "se": 1.224106, "p": 0.332 },
+      "exemption3":{ "wts":  3.319147,  "se": 1.342509, "p": 0.013 },
+      "coverage2": { "wts": -2.085852,  "se": 1.230878, "p": 0.090 },
+      "coverage3": { "wts": -2.066804,  "se": 1.263054, "p": 0.102 }
+    },
+    "Australia_mild": {
+      "scope2":    { "wts":  4.093612,  "se": 1.560018, "p": 0.009 },
+      "exemption2":{ "wts":  0.912456,  "se": 1.860301, "p": 0.624 },
+      "exemption3":{ "wts":  4.248205,  "se": 2.096250, "p": 0.043 },
+      "coverage2": { "wts": -3.017632,  "se": 1.881638, "p": 0.109 },
+      "coverage3": { "wts": -1.606408,  "se": 1.915567, "p": 0.402 }
+    },
+    "Australia_severe": {
+      "scope2":    { "wts":  0.426132,  "se": 1.269503, "p": 0.737 },
+      "exemption2":{ "wts":  1.417720,  "se": 1.615908, "p": 0.380 },
+      "exemption3":{ "wts":  2.536333,  "se": 1.728985, "p": 0.142 },
+      "coverage2": { "wts": -1.269865,  "se": 1.617400, "p": 0.432 },
+      "coverage3": { "wts": -2.434020,  "se": 1.671534, "p": 0.145 }
+    },
+    "France_pooled": {
+      "scope2":    { "wts":  1.741765,  "se": 0.849360, "p": 0.040 },
+      "exemption2":{ "wts":  3.336964,  "se": 1.039326, "p": 0.002 },
+      "exemption3":{ "wts":  3.503236,  "se": 1.198852, "p": 0.003 },
+      "coverage2": { "wts": -6.908663,  "se": 1.071055, "p": 0.000 },
+      "coverage3": { "wts": -5.891525,  "se": 1.120764, "p": 0.000 }
+    },
+    "France_mild": {
+      "scope2":    { "wts":  9.454006,  "se": 2.745076, "p": 0.001 },
+      "exemption2":{ "wts":  5.062347,  "se": 2.541758, "p": 0.049 },
+      "exemption3":{ "wts":  2.247702,  "se": 2.416036, "p": 0.348 },
+      "coverage2": { "wts": -4.854909,  "se": 2.866789, "p": 0.088 },
+      "coverage3": { "wts": -2.248689,  "se": 2.716826, "p": 0.407 }
+    },
+    "France_severe": {
+      "scope2":    { "wts":  1.864020,  "se": 1.665231, "p": 0.270 },
+      "exemption2":{ "wts":  4.196045,  "se": 1.720191, "p": 0.014 },
+      "exemption3":{ "wts":  6.532088,  "se": 1.996989, "p": 0.001 },
+      "coverage2": { "wts": -6.859332,  "se": 1.678753, "p": 0.000 },
+      "coverage3": { "wts": -6.628873,  "se": 1.830494, "p": 0.000 }
+    },
+    "Italy_pooled": {
+      "scope2":    { "wts":  2.171214,  "se": 0.670734, "p": 0.001 },
+      "exemption2":{ "wts":  2.370706,  "se": 0.667514, "p": 0.000 },
+      "exemption3":{ "wts":  4.531191,  "se": 1.400532, "p": 0.001 },
+      "coverage2": { "wts": -2.577418,  "se": 0.656207, "p": 0.000 },
+      "coverage3": { "wts": -2.288734,  "se": 0.737431, "p": 0.002 }
+    },
+    "Italy_mild": {
+      "scope2":    { "wts":  2.292099,  "se": 0.619482, "p": 0.000 },
+      "exemption2":{ "wts":  2.171137,  "se": 0.671307, "p": 0.001 },
+      "exemption3":{ "wts":  3.954745,  "se": 1.117089, "p": 0.000 },
+      "coverage2": { "wts": -4.667902,  "se": 0.810298, "p": 0.000 },
+      "coverage3": { "wts": -3.799763,  "se": 0.858045, "p": 0.000 }
+    },
+    "Italy_severe": {
+      "scope2":    { "wts": -1.556464,  "se": 1.992159, "p": 0.435 },
+      "exemption2":{ "wts":  2.374846,  "se": 2.586814, "p": 0.359 },
+      "exemption3":{ "wts":  7.388496,  "se": 3.019664, "p": 0.014 },
+      "coverage2": { "wts": -9.462275,  "se": 2.747486, "p": 0.001 },
+      "coverage3": { "wts": -8.019122,  "se": 2.855633, "p": 0.005 }
+    }
+  },
+  "parameters": {
+    "basePopulation": 3000,
+    "costPerVaccinated": 50,
+    "fixedCostPer100k": 200000,
+    "valuePerQALY": 50000,
+    "QALY_per_life": {
+      "low": 5,
+      "moderate": 10,
+      "high": 20
+    }
+  }
+}
