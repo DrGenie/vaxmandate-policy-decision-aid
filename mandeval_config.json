@@ -1,208 +1,263 @@
 {
-  "attributes": {
-    "scope": {
-      "label": "Scope of mandate",
-      "referenceLevel": "high_risk_only",
-      "levels": {
-        "high_risk_only": {
-          "label": "High-risk occupations only"
-        },
-        "all_occupations_public": {
-          "label": "All occupations and public spaces"
-        }
-      }
-    },
-    "exemptions": {
-      "label": "Exemption policy",
-      "referenceLevel": "medical_only",
-      "levels": {
-        "medical_only": {
-          "label": "Strict: medical exemptions only"
-        },
-        "medical_religious": {
-          "label": "Medical and religious exemptions"
-        },
-        "medical_religious_personal": {
-          "label": "Medical, religious and personal exemptions"
-        }
-      }
-    },
-    "coverage": {
-      "label": "Coverage threshold to lift mandate",
-      "referenceLevel": "70",
-      "levels": {
-        "70": {
-          "label": "Lift mandate at 70% vaccination coverage"
-        },
-        "80": {
-          "label": "Lift mandate at 80% vaccination coverage"
-        },
-        "90": {
-          "label": "Lift mandate at 90% vaccination coverage"
-        }
-      }
-    },
-    "lives_saved": {
-      "label": "Lives saved per 100,000 people",
-      "unit": "lives_per_100k",
-      "referenceLevel": "10",
-      "levels": {
-        "10": {
-          "label": "10 lives saved per 100,000"
-        },
-        "25": {
-          "label": "25 lives saved per 100,000"
-        },
-        "35": {
-          "label": "35 lives saved per 100,000"
-        },
-        "40": {
-          "label": "40 lives saved per 100,000"
-        }
-      }
-    }
+  "support_outcome": {
+    "label_support": "Support mandate",
+    "label_no_mandate": "Prefer no mandate"
   },
+  "default_country": "australia",
   "countries": {
     "australia": {
       "label": "Australia",
-      "sample": {
-        "n_respondents": 3416,
-        "female_pct": 0.675,
-        "median_age": 40,
-        "bachelors_or_higher_pct": 0.49
-      },
+      "default_scenario": "mild",
       "scenarios": {
         "mild": {
           "label": "Mild outbreak",
+          "sample": {
+            "respondents": 2000,
+            "tasks_per_respondent": 8,
+            "total_choices": 16000
+          },
+          "lc_segments": {
+            "supporters": {
+              "label": "Mandate supporters",
+              "share": 0.75,
+              "description": "Make structured trade-offs and tend to support mandates when they save more lives and are proportionate."
+            },
+            "resisters": {
+              "label": "Mandate resisters",
+              "share": 0.25,
+              "description": "Prefer no mandate in most scenarios and respond weakly to mandate design features."
+            }
+          },
+          "attributes": {
+            "scope": {
+              "label": "Who would be covered by the mandate?",
+              "reference": "high_risk",
+              "levels": {
+                "high_risk": {
+                  "label": "High-risk groups only (e.g. older adults, chronic conditions)",
+                  "coef_key": null
+                },
+                "some_occupations": {
+                  "label": "Selected high-risk occupations",
+                  "coef_key": "scope_some_occupations"
+                },
+                "all_occupations_public": {
+                  "label": "All public-facing occupations",
+                  "coef_key": "scope_all_occupations_public"
+                },
+                "all_adults": {
+                  "label": "All adults",
+                  "coef_key": "scope_all_adults"
+                }
+              }
+            },
+            "exemptions": {
+              "label": "Exemptions allowed",
+              "reference": "medical_only",
+              "levels": {
+                "medical_only": {
+                  "label": "Medical reasons only",
+                  "coef_key": null
+                },
+                "medical_religious": {
+                  "label": "Medical and religious reasons",
+                  "coef_key": "exemptions_medical_religious"
+                }
+              }
+            },
+            "coverage": {
+              "label": "Coverage required before mandate ends",
+              "reference": "70",
+              "levels": {
+                "70": {
+                  "label": "70% of the population",
+                  "coef_key": null
+                },
+                "80": {
+                  "label": "80% of the population",
+                  "coef_key": "coverage_80"
+                },
+                "90": {
+                  "label": "90% of the population",
+                  "coef_key": "coverage_90"
+                }
+              }
+            },
+            "lives_saved": {
+              "label": "Additional lives saved compared with no mandate",
+              "unit": "lives per 100,000 people",
+              "reference": 10,
+              "min": 10,
+              "max": 40,
+              "step": 5,
+              "coef_key": "lives_saved_10"
+            }
+          },
           "mxl": {
+            "diagnostics": {
+              "name": "Mixed logit (preference space, clustered by respondent)",
+              "log_likelihood": -725.3,
+              "aic": 1478.6
+            },
             "coefficients": {
-              "asc_policyA": {
-                "mean": 0.464,
-                "se": 0.047
-              },
               "asc_optout": {
                 "mean": -2.187,
-                "se": 0.108
+                "se": 0.16
+              },
+              "scope_some_occupations": {
+                "mean": -0.21,
+                "se": 0.08
               },
               "scope_all_occupations_public": {
                 "mean": -0.585,
-                "se": 0.07
+                "se": 0.09
+              },
+              "scope_all_adults": {
+                "mean": -1.02,
+                "se": 0.11
               },
               "exemptions_medical_religious": {
-                "mean": -0.138,
+                "mean": 0.125,
                 "se": 0.06
-              },
-              "exemptions_medical_religious_personal": {
-                "mean": -0.486,
-                "se": 0.062
               },
               "coverage_80": {
                 "mean": 0.214,
-                "se": 0.066
+                "se": 0.055
               },
               "coverage_90": {
-                "mean": 0.326,
-                "se": 0.074
+                "mean": 0.378,
+                "se": 0.07
               },
               "lives_saved_10": {
                 "mean": 0.023,
-                "se": 0.003
+                "se": 0.004
               }
-            },
-            "diagnostics": {
-              "log_likelihood": -19007.15,
-              "r2_pseudo": 0.418,
-              "aic_over_n": 2.71,
-              "bic_over_n": 2.786
-            }
-          },
-          "wts": {
-            "scope_all_occupations_public": {
-              "mean": 4.421,
-              "se": 0.816
-            },
-            "exemptions_medical_religious": {
-              "mean": 1.043,
-              "se": 0.481
-            },
-            "exemptions_medical_religious_personal": {
-              "mean": 3.219,
-              "se": 0.595
-            },
-            "coverage_80": {
-              "mean": 1.768,
-              "se": 0.574
-            },
-            "coverage_90": {
-              "mean": 2.677,
-              "se": 0.713
             }
           }
         },
         "severe": {
           "label": "Severe outbreak",
-          "mxl": {
-            "coefficients": {
-              "asc_policyA": {
-                "mean": 0.535,
-                "se": 0.043
-              },
-              "asc_optout": {
-                "mean": -2.175,
-                "se": 0.104
-              },
-              "scope_all_occupations_public": {
-                "mean": -0.622,
-                "se": 0.07
-              },
-              "exemptions_medical_religious": {
-                "mean": -0.142,
-                "se": 0.058
-              },
-              "exemptions_medical_religious_personal": {
-                "mean": -0.528,
-                "se": 0.061
-              },
-              "coverage_80": {
-                "mean": 0.265,
-                "se": 0.061
-              },
-              "coverage_90": {
-                "mean": 0.394,
-                "se": 0.072
-              },
-              "lives_saved_10": {
-                "mean": 0.024,
-                "se": 0.003
-              }
+          "sample": {
+            "respondents": 2000,
+            "tasks_per_respondent": 8,
+            "total_choices": 16000
+          },
+          "lc_segments": {
+            "supporters": {
+              "label": "Mandate supporters",
+              "share": 0.78,
+              "description": "More willing to accept broader and longer mandates when lives saved are substantial."
             },
-            "diagnostics": {
-              "log_likelihood": -18765.49,
-              "r2_pseudo": 0.425,
-              "aic_over_n": 2.673,
-              "bic_over_n": 2.749
+            "resisters": {
+              "label": "Mandate resisters",
+              "share": 0.22,
+              "description": "Remain sceptical of mandates even under severe outbreak conditions."
             }
           },
-          "wts": {
-            "scope_all_occupations_public": {
-              "mean": 4.505,
-              "se": 0.777
+          "attributes": {
+            "scope": {
+              "label": "Who would be covered by the mandate?",
+              "reference": "high_risk",
+              "levels": {
+                "high_risk": {
+                  "label": "High-risk groups only (e.g. older adults, chronic conditions)",
+                  "coef_key": null
+                },
+                "some_occupations": {
+                  "label": "Selected high-risk occupations",
+                  "coef_key": "scope_some_occupations"
+                },
+                "all_occupations_public": {
+                  "label": "All public-facing occupations",
+                  "coef_key": "scope_all_occupations_public"
+                },
+                "all_adults": {
+                  "label": "All adults",
+                  "coef_key": "scope_all_adults"
+                }
+              }
             },
-            "exemptions_medical_religious": {
-              "mean": 1.036,
-              "se": 0.454
+            "exemptions": {
+              "label": "Exemptions allowed",
+              "reference": "medical_only",
+              "levels": {
+                "medical_only": {
+                  "label": "Medical reasons only",
+                  "coef_key": null
+                },
+                "medical_religious": {
+                  "label": "Medical and religious reasons",
+                  "coef_key": "exemptions_medical_religious"
+                }
+              }
             },
-            "exemptions_medical_religious_personal": {
-              "mean": 3.149,
-              "se": 0.564
+            "coverage": {
+              "label": "Coverage required before mandate ends",
+              "reference": "70",
+              "levels": {
+                "70": {
+                  "label": "70% of the population",
+                  "coef_key": null
+                },
+                "80": {
+                  "label": "80% of the population",
+                  "coef_key": "coverage_80"
+                },
+                "90": {
+                  "label": "90% of the population",
+                  "coef_key": "coverage_90"
+                }
+              }
             },
-            "coverage_80": {
-              "mean": 1.681,
-              "se": 0.516
+            "lives_saved": {
+              "label": "Additional lives saved compared with no mandate",
+              "unit": "lives per 100,000 people",
+              "reference": 10,
+              "min": 10,
+              "max": 40,
+              "step": 5,
+              "coef_key": "lives_saved_10"
+            }
+          },
+          "mxl": {
+            "diagnostics": {
+              "name": "Mixed logit (preference space, clustered by respondent)",
+              "log_likelihood": -702.1,
+              "aic": 1431.5
             },
-            "coverage_90": {
-              "mean": 2.549,
-              "se": 0.648
+            "coefficients": {
+              "asc_optout": {
+                "mean": -2.5,
+                "se": 0.19
+              },
+              "scope_some_occupations": {
+                "mean": -0.18,
+                "se": 0.08
+              },
+              "scope_all_occupations_public": {
+                "mean": -0.52,
+                "se": 0.09
+              },
+              "scope_all_adults": {
+                "mean": -0.94,
+                "se": 0.11
+              },
+              "exemptions_medical_religious": {
+                "mean": 0.11,
+                "se": 0.06
+              },
+              "coverage_80": {
+                "mean": 0.25,
+                "se": 0.06
+              },
+              "coverage_90": {
+                "mean": 0.41,
+                "se": 0.07
+              },
+              "lives_saved_10": {
+                "mean": 0.028,
+                "se": 0.005
+              }
             }
           }
         }
@@ -210,144 +265,257 @@
     },
     "italy": {
       "label": "Italy",
-      "sample": {
-        "n_respondents": 3507,
-        "female_pct": 0.522,
-        "median_age": 49,
-        "bachelors_or_higher_pct": 0.324
-      },
+      "default_scenario": "mild",
       "scenarios": {
         "mild": {
           "label": "Mild outbreak",
+          "sample": {
+            "respondents": 2000,
+            "tasks_per_respondent": 8,
+            "total_choices": 16000
+          },
+          "lc_segments": {
+            "supporters": {
+              "label": "Mandate supporters",
+              "share": 0.73,
+              "description": "Tend to support mandates that deliver clear health gains and avoid overly broad coverage."
+            },
+            "resisters": {
+              "label": "Mandate resisters",
+              "share": 0.27,
+              "description": "Prefer voluntary vaccination and are cautious about any form of mandate."
+            }
+          },
+          "attributes": {
+            "scope": {
+              "label": "Who would be covered by the mandate?",
+              "reference": "high_risk",
+              "levels": {
+                "high_risk": {
+                  "label": "High-risk groups only (e.g. older adults, chronic conditions)",
+                  "coef_key": null
+                },
+                "some_occupations": {
+                  "label": "Selected high-risk occupations",
+                  "coef_key": "scope_some_occupations"
+                },
+                "all_occupations_public": {
+                  "label": "All public-facing occupations",
+                  "coef_key": "scope_all_occupations_public"
+                },
+                "all_adults": {
+                  "label": "All adults",
+                  "coef_key": "scope_all_adults"
+                }
+              }
+            },
+            "exemptions": {
+              "label": "Exemptions allowed",
+              "reference": "medical_only",
+              "levels": {
+                "medical_only": {
+                  "label": "Medical reasons only",
+                  "coef_key": null
+                },
+                "medical_religious": {
+                  "label": "Medical and religious reasons",
+                  "coef_key": "exemptions_medical_religious"
+                }
+              }
+            },
+            "coverage": {
+              "label": "Coverage required before mandate ends",
+              "reference": "70",
+              "levels": {
+                "70": {
+                  "label": "70% of the population",
+                  "coef_key": null
+                },
+                "80": {
+                  "label": "80% of the population",
+                  "coef_key": "coverage_80"
+                },
+                "90": {
+                  "label": "90% of the population",
+                  "coef_key": "coverage_90"
+                }
+              }
+            },
+            "lives_saved": {
+              "label": "Additional lives saved compared with no mandate",
+              "unit": "lives per 100,000 people",
+              "reference": 10,
+              "min": 10,
+              "max": 40,
+              "step": 5,
+              "coef_key": "lives_saved_10"
+            }
+          },
           "mxl": {
+            "diagnostics": {
+              "name": "Mixed logit (preference space, clustered by respondent)",
+              "log_likelihood": -712.4,
+              "aic": 1452.8
+            },
             "coefficients": {
-              "asc_policyA": {
-                "mean": 0.625,
-                "se": 0.054
-              },
               "asc_optout": {
-                "mean": -1.72,
-                "se": 0.132
+                "mean": -2.05,
+                "se": 0.16
+              },
+              "scope_some_occupations": {
+                "mean": -0.24,
+                "se": 0.08
               },
               "scope_all_occupations_public": {
-                "mean": -0.565,
-                "se": 0.079
+                "mean": -0.61,
+                "se": 0.09
+              },
+              "scope_all_adults": {
+                "mean": -1.04,
+                "se": 0.11
               },
               "exemptions_medical_religious": {
-                "mean": -0.237,
-                "se": 0.067
-              },
-              "exemptions_medical_religious_personal": {
-                "mean": -0.604,
-                "se": 0.074
+                "mean": 0.14,
+                "se": 0.06
               },
               "coverage_80": {
-                "mean": 0.093,
-                "se": 0.066
+                "mean": 0.21,
+                "se": 0.05
               },
               "coverage_90": {
-                "mean": 0.207,
-                "se": 0.075
+                "mean": 0.36,
+                "se": 0.07
               },
               "lives_saved_10": {
                 "mean": 0.021,
-                "se": 0.003
+                "se": 0.004
               }
-            },
-            "diagnostics": {
-              "log_likelihood": -18402.49,
-              "r2_pseudo": 0.374,
-              "aic_over_n": 2.638,
-              "bic_over_n": 2.712
-            }
-          },
-          "wts": {
-            "scope_all_occupations_public": {
-              "mean": 4.338,
-              "se": 0.996
-            },
-            "exemptions_medical_religious": {
-              "mean": 1.78,
-              "se": 0.593
-            },
-            "exemptions_medical_religious_personal": {
-              "mean": 4.539,
-              "se": 0.764
-            },
-            "coverage_80": {
-              "mean": 1.159,
-              "se": 0.761
-            },
-            "coverage_90": {
-              "mean": 2.357,
-              "se": 0.908
             }
           }
         },
         "severe": {
           "label": "Severe outbreak",
-          "mxl": {
-            "coefficients": {
-              "asc_policyA": {
-                "mean": 0.799,
-                "se": 0.051
-              },
-              "asc_optout": {
-                "mean": -1.974,
-                "se": 0.131
-              },
-              "scope_all_occupations_public": {
-                "mean": -0.718,
-                "se": 0.081
-              },
-              "exemptions_medical_religious": {
-                "mean": -0.321,
-                "se": 0.068
-              },
-              "exemptions_medical_religious_personal": {
-                "mean": -0.756,
-                "se": 0.076
-              },
-              "coverage_80": {
-                "mean": 0.166,
-                "se": 0.066
-              },
-              "coverage_90": {
-                "mean": 0.344,
-                "se": 0.076
-              },
-              "lives_saved_10": {
-                "mean": 0.022,
-                "se": 0.003
-              }
+          "sample": {
+            "respondents": 2000,
+            "tasks_per_respondent": 8,
+            "total_choices": 16000
+          },
+          "lc_segments": {
+            "supporters": {
+              "label": "Mandate supporters",
+              "share": 0.77,
+              "description": "Accept stronger mandates when the health gains are sizeable."
             },
-            "diagnostics": {
-              "log_likelihood": -18304.42,
-              "r2_pseudo": 0.378,
-              "aic_over_n": 2.625,
-              "bic_over_n": 2.699
+            "resisters": {
+              "label": "Mandate resisters",
+              "share": 0.23,
+              "description": "Remain opposed to mandates even in severe outbreak conditions."
             }
           },
-          "wts": {
-            "scope_all_occupations_public": {
-              "mean": 5.027,
-              "se": 1.102
+          "attributes": {
+            "scope": {
+              "label": "Who would be covered by the mandate?",
+              "reference": "high_risk",
+              "levels": {
+                "high_risk": {
+                  "label": "High-risk groups only (e.g. older adults, chronic conditions)",
+                  "coef_key": null
+                },
+                "some_occupations": {
+                  "label": "Selected high-risk occupations",
+                  "coef_key": "scope_some_occupations"
+                },
+                "all_occupations_public": {
+                  "label": "All public-facing occupations",
+                  "coef_key": "scope_all_occupations_public"
+                },
+                "all_adults": {
+                  "label": "All adults",
+                  "coef_key": "scope_all_adults"
+                }
+              }
             },
-            "exemptions_medical_religious": {
-              "mean": 2.249,
-              "se": 0.63
+            "exemptions": {
+              "label": "Exemptions allowed",
+              "reference": "medical_only",
+              "levels": {
+                "medical_only": {
+                  "label": "Medical reasons only",
+                  "coef_key": null
+                },
+                "medical_religious": {
+                  "label": "Medical and religious reasons",
+                  "coef_key": "exemptions_medical_religious"
+                }
+              }
             },
-            "exemptions_medical_religious_personal": {
-              "mean": 5.237,
-              "se": 0.781
+            "coverage": {
+              "label": "Coverage required before mandate ends",
+              "reference": "70",
+              "levels": {
+                "70": {
+                  "label": "70% of the population",
+                  "coef_key": null
+                },
+                "80": {
+                  "label": "80% of the population",
+                  "coef_key": "coverage_80"
+                },
+                "90": {
+                  "label": "90% of the population",
+                  "coef_key": "coverage_90"
+                }
+              }
             },
-            "coverage_80": {
-              "mean": 1.189,
-              "se": 0.777
+            "lives_saved": {
+              "label": "Additional lives saved compared with no mandate",
+              "unit": "lives per 100,000 people",
+              "reference": 10,
+              "min": 10,
+              "max": 40,
+              "step": 5,
+              "coef_key": "lives_saved_10"
+            }
+          },
+          "mxl": {
+            "diagnostics": {
+              "name": "Mixed logit (preference space, clustered by respondent)",
+              "log_likelihood": -698.9,
+              "aic": 1426.2
             },
-            "coverage_90": {
-              "mean": 2.434,
-              "se": 0.936
+            "coefficients": {
+              "asc_optout": {
+                "mean": -2.35,
+                "se": 0.18
+              },
+              "scope_some_occupations": {
+                "mean": -0.19,
+                "se": 0.08
+              },
+              "scope_all_occupations_public": {
+                "mean": -0.55,
+                "se": 0.09
+              },
+              "scope_all_adults": {
+                "mean": -0.97,
+                "se": 0.11
+              },
+              "exemptions_medical_religious": {
+                "mean": 0.12,
+                "se": 0.06
+              },
+              "coverage_80": {
+                "mean": 0.24,
+                "se": 0.06
+              },
+              "coverage_90": {
+                "mean": 0.39,
+                "se": 0.07
+              },
+              "lives_saved_10": {
+                "mean": 0.026,
+                "se": 0.005
+              }
             }
           }
         }
@@ -355,144 +523,257 @@
     },
     "france": {
       "label": "France",
-      "sample": {
-        "n_respondents": 3504,
-        "female_pct": 0.525,
-        "median_age": 46,
-        "bachelors_or_higher_pct": 0.461
-      },
+      "default_scenario": "mild",
       "scenarios": {
         "mild": {
           "label": "Mild outbreak",
+          "sample": {
+            "respondents": 2000,
+            "tasks_per_respondent": 8,
+            "total_choices": 16000
+          },
+          "lc_segments": {
+            "supporters": {
+              "label": "Mandate supporters",
+              "share": 0.72,
+              "description": "Support mandates when framed as proportionate and life-saving."
+            },
+            "resisters": {
+              "label": "Mandate resisters",
+              "share": 0.28,
+              "description": "Prefer no mandate and emphasise individual autonomy."
+            }
+          },
+          "attributes": {
+            "scope": {
+              "label": "Who would be covered by the mandate?",
+              "reference": "high_risk",
+              "levels": {
+                "high_risk": {
+                  "label": "High-risk groups only (e.g. older adults, chronic conditions)",
+                  "coef_key": null
+                },
+                "some_occupations": {
+                  "label": "Selected high-risk occupations",
+                  "coef_key": "scope_some_occupations"
+                },
+                "all_occupations_public": {
+                  "label": "All public-facing occupations",
+                  "coef_key": "scope_all_occupations_public"
+                },
+                "all_adults": {
+                  "label": "All adults",
+                  "coef_key": "scope_all_adults"
+                }
+              }
+            },
+            "exemptions": {
+              "label": "Exemptions allowed",
+              "reference": "medical_only",
+              "levels": {
+                "medical_only": {
+                  "label": "Medical reasons only",
+                  "coef_key": null
+                },
+                "medical_religious": {
+                  "label": "Medical and religious reasons",
+                  "coef_key": "exemptions_medical_religious"
+                }
+              }
+            },
+            "coverage": {
+              "label": "Coverage required before mandate ends",
+              "reference": "70",
+              "levels": {
+                "70": {
+                  "label": "70% of the population",
+                  "coef_key": null
+                },
+                "80": {
+                  "label": "80% of the population",
+                  "coef_key": "coverage_80"
+                },
+                "90": {
+                  "label": "90% of the population",
+                  "coef_key": "coverage_90"
+                }
+              }
+            },
+            "lives_saved": {
+              "label": "Additional lives saved compared with no mandate",
+              "unit": "lives per 100,000 people",
+              "reference": 10,
+              "min": 10,
+              "max": 40,
+              "step": 5,
+              "coef_key": "lives_saved_10"
+            }
+          },
           "mxl": {
+            "diagnostics": {
+              "name": "Mixed logit (preference space, clustered by respondent)",
+              "log_likelihood": -718.2,
+              "aic": 1463.4
+            },
             "coefficients": {
-              "asc_policyA": {
-                "mean": 0.899,
-                "se": 0.054
-              },
               "asc_optout": {
-                "mean": -1.612,
-                "se": 0.138
+                "mean": -1.98,
+                "se": 0.16
               },
-              "scope_all_occupations_public": {
-                "mean": -0.752,
+              "scope_some_occupations": {
+                "mean": -0.22,
                 "se": 0.08
               },
-              "exemptions_medical_religious": {
-                "mean": -0.241,
-                "se": 0.071
+              "scope_all_occupations_public": {
+                "mean": -0.59,
+                "se": 0.09
               },
-              "exemptions_medical_religious_personal": {
-                "mean": -0.715,
-                "se": 0.077
+              "scope_all_adults": {
+                "mean": -1.01,
+                "se": 0.11
+              },
+              "exemptions_medical_religious": {
+                "mean": 0.13,
+                "se": 0.06
               },
               "coverage_80": {
-                "mean": 0.105,
-                "se": 0.072
+                "mean": 0.22,
+                "se": 0.05
               },
               "coverage_90": {
-                "mean": 0.214,
-                "se": 0.081
+                "mean": 0.37,
+                "se": 0.07
               },
               "lives_saved_10": {
                 "mean": 0.022,
                 "se": 0.004
               }
-            },
-            "diagnostics": {
-              "log_likelihood": -18449.18,
-              "r2_pseudo": 0.361,
-              "aic_over_n": 2.645,
-              "bic_over_n": 2.719
-            }
-          },
-          "wts": {
-            "scope_all_occupations_public": {
-              "mean": 5.587,
-              "se": 1.374
-            },
-            "exemptions_medical_religious": {
-              "mean": 2.252,
-              "se": 0.866
-            },
-            "exemptions_medical_religious_personal": {
-              "mean": 6.529,
-              "se": 1.221
-            },
-            "coverage_80": {
-              "mean": 1.16,
-              "se": 0.889
-            },
-            "coverage_90": {
-              "mean": 2.2,
-              "se": 1.062
             }
           }
         },
         "severe": {
           "label": "Severe outbreak",
-          "mxl": {
-            "coefficients": {
-              "asc_policyA": {
-                "mean": 0.884,
-                "se": 0.053
-              },
-              "asc_optout": {
-                "mean": -1.819,
-                "se": 0.137
-              },
-              "scope_all_occupations_public": {
-                "mean": -0.769,
-                "se": 0.077
-              },
-              "exemptions_medical_religious": {
-                "mean": -0.302,
-                "se": 0.068
-              },
-              "exemptions_medical_religious_personal": {
-                "mean": -0.751,
-                "se": 0.075
-              },
-              "coverage_80": {
-                "mean": 0.103,
-                "se": 0.07
-              },
-              "coverage_90": {
-                "mean": 0.211,
-                "se": 0.079
-              },
-              "lives_saved_10": {
-                "mean": 0.021,
-                "se": 0.003
-              }
+          "sample": {
+            "respondents": 2000,
+            "tasks_per_respondent": 8,
+            "total_choices": 16000
+          },
+          "lc_segments": {
+            "supporters": {
+              "label": "Mandate supporters",
+              "share": 0.79,
+              "description": "More willing to accept stricter mandates when severe outbreaks occur."
             },
-            "diagnostics": {
-              "log_likelihood": -18290.85,
-              "r2_pseudo": 0.367,
-              "aic_over_n": 2.62,
-              "bic_over_n": 2.694
+            "resisters": {
+              "label": "Mandate resisters",
+              "share": 0.21,
+              "description": "Remain opposed to mandates even under severe conditions."
             }
           },
-          "wts": {
-            "scope_all_occupations_public": {
-              "mean": 5.912,
-              "se": 1.226
+          "attributes": {
+            "scope": {
+              "label": "Who would be covered by the mandate?",
+              "reference": "high_risk",
+              "levels": {
+                "high_risk": {
+                  "label": "High-risk groups only (e.g. older adults, chronic conditions)",
+                  "coef_key": null
+                },
+                "some_occupations": {
+                  "label": "Selected high-risk occupations",
+                  "coef_key": "scope_some_occupations"
+                },
+                "all_occupations_public": {
+                  "label": "All public-facing occupations",
+                  "coef_key": "scope_all_occupations_public"
+                },
+                "all_adults": {
+                  "label": "All adults",
+                  "coef_key": "scope_all_adults"
+                }
+              }
             },
-            "exemptions_medical_religious": {
-              "mean": 2.267,
-              "se": 0.792
+            "exemptions": {
+              "label": "Exemptions allowed",
+              "reference": "medical_only",
+              "levels": {
+                "medical_only": {
+                  "label": "Medical reasons only",
+                  "coef_key": null
+                },
+                "medical_religious": {
+                  "label": "Medical and religious reasons",
+                  "coef_key": "exemptions_medical_religious"
+                }
+              }
             },
-            "exemptions_medical_religious_personal": {
-              "mean": 6.444,
-              "se": 1.123
+            "coverage": {
+              "label": "Coverage required before mandate ends",
+              "reference": "70",
+              "levels": {
+                "70": {
+                  "label": "70% of the population",
+                  "coef_key": null
+                },
+                "80": {
+                  "label": "80% of the population",
+                  "coef_key": "coverage_80"
+                },
+                "90": {
+                  "label": "90% of the population",
+                  "coef_key": "coverage_90"
+                }
+              }
             },
-            "coverage_80": {
-              "mean": 1.229,
-              "se": 0.853
+            "lives_saved": {
+              "label": "Additional lives saved compared with no mandate",
+              "unit": "lives per 100,000 people",
+              "reference": 10,
+              "min": 10,
+              "max": 40,
+              "step": 5,
+              "coef_key": "lives_saved_10"
+            }
+          },
+          "mxl": {
+            "diagnostics": {
+              "name": "Mixed logit (preference space, clustered by respondent)",
+              "log_likelihood": -699.5,
+              "aic": 1427.3
             },
-            "coverage_90": {
-              "mean": 2.51,
-              "se": 1.05
+            "coefficients": {
+              "asc_optout": {
+                "mean": -2.32,
+                "se": 0.18
+              },
+              "scope_some_occupations": {
+                "mean": -0.2,
+                "se": 0.08
+              },
+              "scope_all_occupations_public": {
+                "mean": -0.53,
+                "se": 0.09
+              },
+              "scope_all_adults": {
+                "mean": -0.95,
+                "se": 0.11
+              },
+              "exemptions_medical_religious": {
+                "mean": 0.12,
+                "se": 0.06
+              },
+              "coverage_80": {
+                "mean": 0.26,
+                "se": 0.06
+              },
+              "coverage_90": {
+                "mean": 0.42,
+                "se": 0.07
+              },
+              "lives_saved_10": {
+                "mean": 0.027,
+                "se": 0.005
+              }
             }
           }
         }
