@@ -2,955 +2,507 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VaxMandate Decision Aid Tool</title>
-  <!-- Font Awesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
-        integrity="sha512-papNMzNnQn5iH+1G+FHu8SyuXHs6A1k+Ln7tK5qRo1l5eYm6Jzv+1pArJ7N4C9FfpRrmAgM3tYWd3FZ9jKz1Bw==" 
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <!-- Chart.js Library -->
+  <title>MandEval Vaccine Mandate Policy Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- jsPDF Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <!-- Inline Styles -->
-  <style>
-    /* RESET & BASE STYLES */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f0f2f5;
-      color: #333;
-    }
-    .container {
-      width: 95%;
-      max-width: 1200px;
-      margin: 20px auto;
-      background-color: #fff;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-      padding: 20px 30px;
-    }
-
-    /* HEADER */
-    header h1 {
-      text-align: center;
-      margin-bottom: 15px;
-      color: #2c3e50;
-    }
-    header p {
-      font-size: 1.05em;
-      color: #7f8c8d;
-      text-align: center;
-      max-width: 800px;
-      margin: 0 auto 15px;
-    }
-
-    /* NAVIGATION TABS */
-    .tabs {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 25px;
-    }
-    .tablink {
-      background: #ecf0f1;
-      border: none;
-      padding: 12px 18px;
-      margin: 3px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: background-color 0.3s;
-      color: #2c3e50;
-      border-top-left-radius: 5px;
-      border-top-right-radius: 5px;
-    }
-    .tablink.active {
-      background: #2980b9;
-      color: #fff;
-    }
-    .tablink:hover {
-      background: #bdc3c7;
-    }
-
-    /* TAB CONTENT */
-    .tabcontent {
-      display: none;
-      margin-top: 10px;
-    }
-    .tabcontent h2 {
-      margin-bottom: 10px;
-    }
-    .tabcontent p {
-      margin-bottom: 10px;
-      line-height: 1.4;
-    }
-
-    /* LISTS & PARAGRAPHS */
-    .intro-box ul {
-      list-style: inside disc;
-      margin-left: 20px;
-      margin-bottom: 10px;
-    }
-    .intro-box ul li {
-      margin: 5px 0;
-    }
-    .intro-box ul li em {
-      color: #2980b9;
-    }
-    .calculation-info ol {
-      list-style: decimal;
-      margin-left: 20px;
-    }
-    .calculation-info ul {
-      list-style: circle;
-      margin-left: 40px;
-      margin-top: 5px;
-    }
-    .calculation-info li {
-      margin: 8px 0;
-    }
-
-    /* FORM & BUTTONS */
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    .form-item {
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 8px;
-      position: relative;
-    }
-    .form-item label {
-      font-weight: 600;
-      color: #2c3e50;
-      margin-bottom: 5px;
-    }
-    .form-item select,
-    .form-item input[type="range"] {
-      padding: 6px;
-      border: 1px solid #bdc3c7;
-      border-radius: 4px;
-      font-size: 1em;
-    }
-    .form-item span {
-      margin-top: 3px;
-      font-weight: 600;
-      color: #e74c3c;
-    }
-    .buttons-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-    .buttons-row button {
-      background-color: #2980b9;
-      color: #fff;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s, transform 0.2s;
-      font-size: 1em;
-    }
-    .buttons-row button:hover {
-      background-color: #1c5980;
-      transform: translateY(-2px);
-    }
-
-    /* INPUT CARDS (Inputs Tab) */
-    .input-card {
-      background-color: #f7f9fc;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 20px;
-    }
-    .input-card h2 {
-      margin-bottom: 10px;
-      color: #2c3e50;
-    }
-    .input-cards {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-    .input-level-card {
-      background-color: #fff;
-      border: 1px solid #bdc3c7;
-      border-radius: 8px;
-      padding: 15px;
-      flex: 1 1 300px;
-    }
-    .input-level-card h3 {
-      margin-bottom: 10px;
-      font-size: 1.1em;
-      color: #2c3e50;
-    }
-    .input-level-card .reference {
-      font-size: 0.9em;
-      color: #7f8c8d;
-      margin-left: 5px;
-    }
-    .input-level-card .options label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: normal;
-    }
-    .input-level-card .options select {
-      margin-top: 3px;
-      margin-bottom: 8px;
-    }
-    .slider-option label {
-      display: flex;
-      align-items: center;
-      font-weight: 600;
-      color: #2c3e50;
-    }
-    .slider-option label i {
-      margin-right: 5px;
-      color: #e74c3c;
-    }
-    .slider-option #livesLabel {
-      font-weight: 700;
-      color: #2c3e50;
-      margin: 0 5px;
-    }
-
-    /* INFO TOOLTIP BUTTONS */
-    .info-container {
-      position: relative;
-      display: inline-block;
-    }
-    .info-button {
-      background: none;
-      border: none;
-      padding: 0;
-      margin-left: 5px;
-      cursor: pointer;
-    }
-    .info-button i {
-      width: 16px;
-      height: 16px;
-      color: #2980b9;
-    }
-    .tooltip-text {
-      visibility: hidden;
-      width: 240px;
-      background-color: #2c3e50;
-      color: #fff;
-      text-align: left;
-      padding: 10px;
-      border-radius: 6px;
-      position: absolute;
-      z-index: 10;
-      top: 120%;
-      left: 50%;
-      transform: translateX(-50%);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    .info-container:hover .tooltip-text,
-    .info-container:focus-within .tooltip-text {
-      visibility: visible;
-      opacity: 1;
-    }
-
-    /* ATTRIBUTE CARDS */
-    .attributes-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      margin: 20px;
-    }
-    .attribute-card {
-      background-color: #f7f9fc;
-      border-radius: 8px;
-      padding: 15px;
-      display: flex;
-      align-items: flex-start;
-      width: calc(50% - 20px);
-      margin-bottom: 20px;
-      position: relative;
-    }
-    .attribute-icon {
-      margin-right: 15px;
-      display: flex;
-      align-items: center;
-      position: relative;
-    }
-    .attribute-icon svg {
-      width: 24px;
-      height: 24px;
-      cursor: pointer;
-    }
-    .tooltip {
-      visibility: hidden;
-      width: 260px;
-      background-color: #2c3e50;
-      color: #fff;
-      text-align: left;
-      padding: 10px;
-      border-radius: 6px;
-      position: absolute;
-      bottom: 120%;
-      left: 50%;
-      transform: translateX(-50%);
-      opacity: 0;
-      transition: opacity 0.3s;
-      z-index: 10;
-    }
-    .attribute-card:hover .tooltip,
-    .attribute-card:focus-within .tooltip {
-      visibility: visible;
-      opacity: 1;
-    }
-    .attribute-content h4 {
-      margin-bottom: 6px;
-      color: #2c3e50;
-      font-size: 1em;
-    }
-    .attribute-content p {
-      color: #7f8c8d;
-      font-size: 0.95em;
-    }
-
-    /* CHARTS */
-    canvas {
-      margin-top: 10px;
-      background-color: #fff;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    .chart-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      margin-top: 20px;
-    }
-    .chart-box {
-      flex: 1 1 45%;
-      padding: 10px;
-      background: #fafafa;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      position: relative;
-    }
-    .chart-box h3 {
-      text-align: center;
-      margin-bottom: 8px;
-      color: #2c3e50;
-    }
-
-    /* COSTS & BENEFITS */
-    .calculation-info {
-      background-color: #f9f9f9;
-      border-left: 4px solid #2980b9;
-      padding: 15px;
-      border-radius: 6px;
-      margin-top: 15px;
-    }
-    .calculation-info h4 {
-      color: #2c3e50;
-    }
-    .qaly-selector {
-      margin: 10px 0;
-    }
-    .qaly-selector label {
-      font-weight: 600;
-      margin-right: 5px;
-    }
-    .qaly-selector select {
-      padding: 5px;
-      border-radius: 4px;
-    }
-    .modelling-assumptions {
-      background: #f7f9fc;
-      border: 1px solid #dcdde1;
-      border-radius: 6px;
-      padding: 10px;
-      margin-top: 15px;
-    }
-    .modelling-assumptions h3 {
-      font-size: 1em;
-      color: #2c3e50;
-      margin-bottom: 5px;
-    }
-    .modelling-assumptions p {
-      font-size: 0.95em;
-      color: #34495e;
-      line-height: 1.5;
-    }
-    .cost-icons {
-      margin: 10px 0;
-    }
-    .cost-icons .buttons-row {
-      background: #8e44ad;
-      margin: 0 5px 5px 0;
-    }
-    .cost-cards {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      margin-top: 15px;
-    }
-    .cost-card {
-      background-color: #f7f9fc;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      padding: 15px;
-      width: calc(33.33% - 20px);
-      margin-bottom: 20px;
-    }
-    .cost-card h4 {
-      margin: 0 0 8px 0;
-      color: #2c3e50;
-      font-size: 0.95em;
-    }
-    .cost-card p {
-      color: #7f8c8d;
-      font-size: 0.9em;
-      margin: 0;
-    }
-
-    /* RESULTS MODAL */
-    #modalResults h4 {
-      margin-bottom: 10px;
-    }
-    #modalResults p {
-      margin: 8px 0;
-    }
-    #modalResults strong {
-      color: #2c3e50;
-    }
-
-    /* MODAL OVERLAY */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 100;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.5);
-    }
-    .modal-content {
-      background-color: #fff;
-      margin: 15% auto;
-      padding: 20px;
-      border: 1px solid #888;
-      width: 80%;
-      max-width: 500px;
-      border-radius: 8px;
-      position: relative;
-    }
-    .close-button {
-      color: #aaa;
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      font-size: 28px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .close-button:hover,
-    .close-button:focus {
-      color: #000;
-    }
-
-    /* SCENARIOS TABLE */
-    .table-container {
-      overflow-x: auto;
-      margin-top: 15px;
-    }
-    #scenarioTable {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    #scenarioTable th,
-    #scenarioTable td {
-      border: 1px solid #bdc3c7;
-      padding: 8px;
-      text-align: center;
-      font-size: 0.9em;
-    }
-    #scenarioTable th {
-      background-color: #2980b9;
-      color: #fff;
-      font-weight: 600;
-    }
-    #scenarioTable tr:nth-child(even) {
-      background-color: #f2f2f2;
-    }
-
-    /* RESPONSIVE DESIGN */
-    @media (max-width: 992px) {
-      .attribute-card, .cost-card {
-        width: calc(50% - 20px);
-      }
-    }
-    @media (max-width: 768px) {
-      .tabs {
-        flex-direction: column;
-      }
-      .tablink {
-        width: 100%;
-        text-align: left;
-        border-radius: 0;
-      }
-      .form-grid, .input-cards {
-        grid-template-columns: 1fr;
-      }
-      .chart-box {
-        flex: 1 1 100%;
-      }
-      .attributes-list, .cost-cards {
-        flex-direction: column;
-      }
-    }
-
-    /* Responsive embedded video */
-    .video-container {
-      position: relative;
-      padding-bottom: 56.25%;
-      height: 0;
-      overflow: hidden;
-    }
-    .video-container iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    /* FOOTER */
-    footer {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 0.85em;
-      color: #7f8c8d;
-      border-top: 1px solid #ecf0f1;
-      padding-top: 10px;
-    }
-  </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>VaxMandate Decision Aid Tool</h1>
-      <p>
-        This tool helps evaluate vaccine mandate policies in terms of public uptake and cost–benefit outcomes. 
-        Configure a mandate’s scope, exemptions, coverage threshold, and expected lives saved to see predicted compliance 
-        and net benefits across different countries and outbreak scenarios.
-      </p>
+  <div class="app">
+    <header class="app-header">
+      <div class="app-header__title-block">
+        <h1>MandEval Vaccine Mandate Policy Tool</h1>
+        <p class="app-header__subtitle">
+          Explore how alternative vaccine mandate designs affect predicted public support
+          in Australia, Italy and France under mild and severe COVID-19 outbreak scenarios.
+        </p>
+      </div>
+      <div class="app-header__selectors">
+        <div class="control">
+          <label for="countrySelect">Country</label>
+          <select id="countrySelect"></select>
+        </div>
+        <div class="control">
+          <label for="scenarioSelect">Outbreak scenario</label>
+          <select id="scenarioSelect"></select>
+        </div>
+      </div>
     </header>
 
-    <nav class="tabs" role="tablist">
-      <button class="tablink active" data-tab="introTab" aria-selected="true">
-        <i class="fa-solid fa-info-circle"></i><span> Introduction</span>
-      </button>
-      <button class="tablink" data-tab="instructionsTab" aria-selected="false">
-        <i class="fa-solid fa-circle-question"></i><span> Instructions</span>
-      </button>
-      <button class="tablink" data-tab="attributesTab" aria-selected="false">
-        <i class="fa-solid fa-list"></i><span> Attributes</span>
-      </button>
-      <button class="tablink" data-tab="inputsTab" aria-selected="false">
-        <i class="fa-solid fa-sliders"></i><span> Inputs</span>
-      </button>
-      <button class="tablink" data-tab="wtpTab" aria-selected="false">
-        <i class="fa-solid fa-chart-bar"></i><span> WTS Results</span>
-      </button>
-      <button class="tablink" data-tab="probTab" aria-selected="false">
-        <i class="fa-solid fa-chart-pie"></i><span> Predicted Uptake</span>
-      </button>
-      <button class="tablink" data-tab="costsTab" aria-selected="false">
-        <i class="fa-solid fa-calculator"></i><span> Costs &amp; Benefits</span>
-      </button>
-      <button class="tablink" data-tab="scenariosTab" aria-selected="false">
-        <i class="fa-solid fa-folder-open"></i><span> Saved Scenarios</span>
-      </button>
-      <button class="tablink" data-tab="demoTab" aria-selected="false">
-        <i class="fa-solid fa-video"></i><span> Video Demo</span>
-      </button>
-    </nav>
+    <main class="app-main">
+      <div id="errorMessage" class="error-message" aria-live="polite"></div>
 
-    <!-- Introduction Tab -->
-    <section id="introTab" class="tabcontent" tabindex="0" style="display: block;">
-      <div class="intro-box">
-        <p>
-          Vaccine mandates can increase vaccination rates and save lives, but involve trade-offs in who is covered 
-          and what exemptions are allowed. This tool uses DCE-based estimates from Australia, France, and Italy 
-          to predict mandate uptake (support vs. opt-out) and perform cost–benefit analysis. Adjust the parameters 
-          to explore how different designs perform under <em>mild outbreak</em> vs. <em>severe outbreak</em> scenarios.
-        </p>
-        <ul>
-          <li><strong>Instructions</strong> – How to use the simulator step by step.</li>
-          <li><strong>Attributes</strong> – Details of mandate features (hover over info icons for descriptions and reference levels).</li>
-          <li><strong>Inputs</strong> – Select country, outbreak scenario, and configure your mandate scenario.</li>
-          <li><strong>WTS Results</strong> – View charts of willingness-to-save-lives for each attribute (lives trade-off values from the DCE).</li>
-          <li><strong>Predicted Uptake</strong> – See predicted public uptake percentage and get recommendations based on results.</li>
-          <li><strong>Costs &amp; Benefits</strong> – Analyze the costs, QALY-based benefits, and net benefit with breakdowns.</li>
-          <li><strong>Saved Scenarios</strong> – Compare multiple scenarios side by side or export results to PDF.</li>
-        </ul>
-      </div>
-    </section>
+      <section class="controls controls--tabs">
+        <nav class="tabs" aria-label="Tool sections">
+          <button class="tab-button tab-button--active" data-tab-target="tab-overview">
+            Overview
+          </button>
+          <button class="tab-button" data-tab-target="tab-policy">
+            Policy builder
+          </button>
+          <button class="tab-button" data-tab-target="tab-results">
+            Impact &amp; support
+          </button>
+          <button class="tab-button" data-tab-target="tab-equivalence">
+            Trade-offs
+          </button>
+          <button class="tab-button" data-tab-target="tab-appendix">
+            Technical appendix
+          </button>
+          <button class="tab-button" data-tab-target="tab-methods">
+            Methods &amp; data
+          </button>
+        </nav>
+      </section>
 
-    <!-- Instructions Tab -->
-    <section id="instructionsTab" class="tabcontent" tabindex="0">
-      <div class="calculation-info">
-        <h4>How to Use This Tool</h4>
-        <ol>
-          <li style="margin-left: 20px;">Go to the <strong>Attributes</strong> tab to understand each policy feature. 
-            Hover over the <i class="fa-solid fa-info-circle"></i> icons for additional details and to see the reference (default) levels.
-          </li>
-          <li style="margin-left: 20px;">In the <strong>Inputs</strong> tab, first choose a <strong>Country</strong> and an 
-            <strong>Outbreak Scenario</strong> (e.g. pooled data, mild outbreak, or severe outbreak). These selections determine 
-            which preference estimates will be used.
-          </li>
-          <li style="margin-left: 20px;">Configure the mandate’s features using the provided options:
+      <!-- OVERVIEW TAB -->
+      <section id="tab-overview" class="tab-panel tab-panel--active" aria-label="Overview">
+        <div class="card-grid">
+          <section class="card card--wide">
+            <h2>What this tool does</h2>
+            <p>
+              This tool uses discrete choice experiment (DCE) estimates from the MandEval study to
+              predict how different vaccine mandate designs affect the probability that people
+              <strong>support having some mandate</strong> versus <strong>prefer no mandate</strong>.
+            </p>
+            <p>
+              Select a country and outbreak scenario at the top. Then use the
+              <strong>Policy builder</strong> tab to choose:
+            </p>
             <ul>
-              <li><em>Scope:</em> High-risk occupations only (reference) or All occupations &amp; public spaces.</li>
-              <li><em>Exemption policy:</em> Medical only (reference), Medical + religious, or Broad (including personal beliefs).</li>
-              <li><em>Coverage requirement:</em> 50% (reference), 70%, or 90% vaccinated before lifting the mandate.</li>
-              <li><em>Estimated lives saved:</em> Use the slider to set how many lives (per 100,000 people) the mandate is expected to save.</li>
+              <li>Who would be covered by the mandate</li>
+              <li>Which exemptions are allowed</li>
+              <li>Vaccination coverage required before mandates end</li>
+              <li>Expected additional lives saved per 100&nbsp;000 people</li>
             </ul>
-            You may leave an option unselected to use its reference level by default.
-          </li>
-          <li style="margin-left: 20px;">Click “<strong>Calculate &amp; View Results</strong>”. This will display the predicted uptake percentage and a brief recommendation based on your scenario.</li>
-          <li style="margin-left: 20px;">Navigate to the <strong>WTS Results</strong> tab to see a chart of how many lives need to be saved (per 100k) for each attribute to be acceptable (the WTS values). These are derived from respondents’ trade-offs in the DCE.</li>
-          <li style="margin-left: 20px;">Check the <strong>Predicted Uptake</strong> tab for a chart of uptake vs. non-uptake.</li>
-          <li style="margin-left: 20px;">In the <strong>Costs &amp; Benefits</strong> tab, review the economic analysis. Select a QALY gain scenario (low/moderate/high) to vary how many quality-adjusted life years each saved life represents. The summary will update with total costs, monetised benefits, and net benefit. Click “Cost Breakdown” or “Benefits Analysis” for detailed components and assumptions.</li>
-          <li style="margin-left: 20px;">Use <strong>Saved Scenarios</strong> to save your current inputs and results. You can save multiple scenarios (they will appear in the table), then click “Compare &amp; Export to PDF” to generate a side-by-side comparison report.</li>
-        </ol>
-      </div>
-    </section>
+            <p>
+              The <strong>Impact &amp; support</strong> tab then shows predicted support for
+              mandates. The <strong>Trade-offs</strong> tab reports how many additional lives saved per
+              100&nbsp;000 people are, in the model, equivalent to changes in mandate scope or
+              exemptions.
+            </p>
+          </section>
 
-    <!-- Attributes Tab -->
-    <section id="attributesTab" class="tabcontent" tabindex="0">
-      <h2>Mandate Attributes</h2>
-      <div class="attributes-list">
-        <!-- Attribute Card: Scope of Mandate -->
-        <div class="attribute-card" tabindex="0">
-          <div class="attribute-icon">
-            <svg width="24" height="24" fill="#2980b9" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" stroke="#2980b9" stroke-width="2" fill="none"/>
-              <path d="M10 15l-3-3 1.4-1.4 1.6 1.6L15 7l1.4 1.4-6.4 6.4z" fill="#2980b9"/>
-            </svg>
-            <div class="tooltip" role="tooltip">
-              <strong>Reference: High-risk only</strong><br/>
-              Who must get vaccinated. High-risk occupations (e.g. healthcare, emergency services) are mandated by default. 
-              Alternatively, <em>All occupations &amp; public venues</em> means everyone working in or entering public settings must be vaccinated.
-            </div>
-          </div>
-          <div class="attribute-content">
-            <h4>Scope of the Mandate</h4>
-            <p>High-risk jobs only vs. all workers &amp; public spaces.</p>
-          </div>
-        </div>
-        <!-- Attribute Card: Exemption Policy -->
-        <div class="attribute-card" tabindex="0">
-          <div class="attribute-icon">
-            <svg width="24" height="24" fill="#e67e22" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" stroke="#e67e22" stroke-width="2" fill="none"/>
-              <path d="M12 4a8 8 0 0 1 0 16 8 8 0 0 1 0-16z" fill="#e67e22"/>
-            </svg>
-            <div class="tooltip" role="tooltip">
-              <strong>Reference: Medical only</strong><br/>
-              Grounds for opting out. The strictest policy allows only doctor-certified medical exemptions. 
-              More lenient options include <em>medical + religious</em> exemptions, or <em>broad exemptions</em> 
-              (adding personal or philosophical objections).
-            </div>
-          </div>
-          <div class="attribute-content">
-            <h4>Exemption Policy</h4>
-            <p>Who can opt out: just medical, or also religious/personal reasons.</p>
-          </div>
-        </div>
-        <!-- Attribute Card: Coverage Requirement -->
-        <div class="attribute-card" tabindex="0">
-          <div class="attribute-icon">
-            <svg width="24" height="24" fill="#27ae60" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" stroke="#27ae60" stroke-width="2" fill="none"/>
-              <path d="M12 6v6l4 2" stroke="#27ae60" stroke-width="2" fill="none"/>
-            </svg>
-            <div class="tooltip" role="tooltip">
-              <strong>Reference: 50% coverage</strong><br/>
-              The vaccination rate needed to lift the mandate. At <em>50%</em> (low threshold), mandates end sooner; 
-              at <em>70%</em> most restrictions can lift with precautions; at <em>90%</em> (high threshold), mandates stay until nearly everyone is vaccinated, ensuring maximum protection.
-            </div>
-          </div>
-          <div class="attribute-content">
-            <h4>Coverage Requirement</h4>
-            <p>Vaccination rate (50%, 70%, 90%) to remove mandates.</p>
-          </div>
-        </div>
-        <!-- Attribute Card: Lives Saved -->
-        <div class="attribute-card" tabindex="0">
-          <div class="attribute-icon">
-            <svg width="24" height="24" fill="#8e44ad" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" stroke="#8e44ad" stroke-width="2" fill="none"/>
-              <path d="M8 12h8M12 8v8" stroke="#8e44ad" stroke-width="2" fill="none"/>
-            </svg>
-            <div class="tooltip" role="tooltip">
-              The estimated number of lives saved (per 100,000 people) due to the mandate’s increased vaccination. 
-              For example, saving 40 lives per 100k means significantly reducing deaths by curbing the virus spread through the mandate.
-            </div>
-          </div>
-          <div class="attribute-content">
-            <h4>Lives Saved</h4>
-            <p>Lives saved per 100k population due to the mandate.</p>
-          </div>
-        </div>
-      </div>
-    </section>
+          <section class="card">
+            <h2>Sample &amp; design (current view)</h2>
+            <dl class="kpi-grid">
+              <div>
+                <dt>Respondents</dt>
+                <dd id="sampleSizeOverview">—</dd>
+              </div>
+              <div>
+                <dt>Choice tasks per person</dt>
+                <dd id="tasksPerPersonOverview">—</dd>
+              </div>
+              <div>
+                <dt>Total analysed choices</dt>
+                <dd id="totalChoicesOverview">—</dd>
+              </div>
+            </dl>
+            <h3>Model diagnostics</h3>
+            <dl class="kpi-grid">
+              <div>
+                <dt>Model</dt>
+                <dd id="modelNameOverview">Mixed logit (preference space)</dd>
+              </div>
+              <div>
+                <dt>Log-likelihood</dt>
+                <dd id="logLikOverview">—</dd>
+              </div>
+              <div>
+                <dt>AIC</dt>
+                <dd id="aicOverview">—</dd>
+              </div>
+            </dl>
+          </section>
 
-    <!-- Inputs Tab -->
-    <section id="inputsTab" class="tabcontent" tabindex="0">
-      <div class="input-card">
-        <h2>Configure Mandate Scenario</h2>
-        <p>Choose a country and outbreak context, then select policy levels for each feature. Unselected features default to the reference level.</p>
-        <form onsubmit="event.preventDefault();">
-          <div class="input-cards">
-            <!-- Context Card: Country & Scenario -->
-            <div class="input-level-card">
-              <h3>Context Selection</h3>
-              <div class="options">
-                <label>
-                  Country:
-                  <select id="country_select">
-                    <option value="Australia">Australia</option>
-                    <option value="France">France</option>
-                    <option value="Italy">Italy</option>
-                  </select>
-                </label>
-                <label style="margin-top: 5px;">
-                  Outbreak Scenario:
-                  <select id="framing_select">
-                    <option value="pooled">All Outbreaks (Pooled Data)</option>
-                    <option value="mild">Mild Outbreak</option>
-                    <option value="severe">Severe Outbreak</option>
-                  </select>
-                </label>
-              </div>
-            </div>
-            <!-- Scope Card -->
-            <div class="input-level-card">
-              <h3>Scope <span class="reference">(Reference: High-risk only)</span></h3>
-              <div class="options">
-                <label>
-                  <input type="radio" name="scope" id="allScopeCheck" value="all" />
-                  All occupations &amp; public spaces
-                </label>
-                <!-- If not selected, default is high-risk only -->
-              </div>
-            </div>
-            <!-- Exemption Card -->
-            <div class="input-level-card">
-              <h3>Exemptions <span class="reference">(Reference: Medical only)</span></h3>
-              <div class="options">
-                <label>
-                  <input type="radio" name="exemption" id="medRelCheck" value="medRel" />
-                  Medical + religious
-                </label>
-                <label>
-                  <input type="radio" name="exemption" id="broadCheck" value="broad" />
-                  Broad (medical, religious, personal)
-                </label>
-              </div>
-            </div>
-            <!-- Coverage Card -->
-            <div class="input-level-card">
-              <h3>Coverage Target <span class="reference">(Reference: 50%)</span></h3>
-              <div class="options">
-                <label>
-                  <input type="radio" name="coverage" id="cov70Check" value="70" />
-                  70% vaccinated
-                </label>
-                <label>
-                  <input type="radio" name="coverage" id="cov90Check" value="90" />
-                  90% vaccinated
-                </label>
-              </div>
-            </div>
-            <!-- Lives Saved Slider Card -->
-            <div class="input-level-card">
-              <h3>Estimated Lives Saved (per 100k)</h3>
-              <div class="options slider-option">
-                <label for="livesSlider">
-                  <i class="fa-solid fa-heart"></i>
-                  <span id="livesLabel">25</span>
-                </label>
-                <input type="range" id="livesSlider" min="0" max="50" step="1" value="25" oninput="updateLivesDisplay(this.value)" />
-              </div>
-            </div>
-          </div>
-          <div class="buttons-row">
-            <button type="button" onclick="openSingleScenario()">Calculate &amp; View Results</button>
-          </div>
-        </form>
-        <!-- Modal Popup for Results -->
-        <div id="resultModal" class="modal">
-          <div class="modal-content">
-            <span class="close-button" onclick="closeModal()">&times;</span>
-            <div id="modalResults"></div>
-          </div>
+          <section class="card">
+            <h2>Preference segments</h2>
+            <p>
+              Latent class analysis identifies at least two preference segments in each country:
+              a majority <strong>mandate-supporter</strong> group and a smaller
+              <strong>mandate-resister</strong> group.
+            </p>
+            <ul id="segmentOverviewList" class="segment-list"></ul>
+          </section>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- WTS Results Tab -->
-    <section id="wtpTab" class="tabcontent" tabindex="0">
-      <div class="calculation-info">
-        <h4>Willingness-to-Save-Lives (WTS) Results</h4>
-        <p>
-          The WTS value for each attribute is the trade-off in lives saved (per 100k people) that makes the policy change acceptable, 
-          calculated as the ratio of that attribute’s coefficient to the “lives saved” coefficient in the DCE. In other words, it’s how many additional lives 
-          would need to be saved to offset the negative impact of that attribute (if WTS is positive), or how many lives the public is willing to forego for a desirable attribute (if WTS is negative). 
-          Higher WTS indicates a stronger public aversion to that feature.
-        </p>
-        <p>
-          For example, if “All occupations” has WTS = 4, the mandate must save ~4 more lives per 100k for people to accept expanding from high-risk workers to everyone. 
-          Negative WTS (e.g., for a higher coverage target) means people prefer that feature (they would sacrifice some lives saved to have it). 
-          The chart below shows WTS (with standard errors) for the selected country and scenario.
-        </p>
-        <div class="buttons-row">
-          <button onclick="renderWTPChart()">Show WTS Charts</button>
-        </div>
-        <div class="chart-grid">
-          <div class="chart-box">
-            <h3>WTS (Lives per 100k)</h3>
-            <canvas id="wtpChartMain"></canvas>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Predicted Uptake Tab -->
-    <section id="probTab" class="tabcontent" tabindex="0">
-      <div class="calculation-info">
-        <h4>Predicted Mandate Uptake</h4>
-        <p>
-          Click “Show Probability Plot” to visualize the predicted share of the population that would support/comply with the mandate versus opt out. 
-          This percentage is based on the DCE preference model and your selected scenario inputs.
-        </p>
-        <div class="buttons-row">
-          <button onclick="renderProbChart()">Show Probability Plot</button>
-        </div>
-        <div class="chart-grid">
-          <div class="chart-box" style="position: relative; height:300px;">
-            <h3>Uptake vs. Non‑uptake</h3>
-            <canvas id="uptakeChart"></canvas>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Costs & Benefits Tab -->
-    <section id="costsTab" class="tabcontent" tabindex="0">
-      <div class="calculation-info">
-        <h4>Costs &amp; Benefits Analysis</h4>
-        <div class="qaly-selector">
-          <label for="qalySelect">Select QALY Gain per Life Saved:</label>
-          <select id="qalySelect" onchange="renderCostsBenefits()">
-            <option value="low">Low (5 QALYs per life)</option>
-            <option value="moderate" selected>Moderate (10 QALYs per life)</option>
-            <option value="high">High (20 QALYs per life)</option>
-          </select>
-        </div>
-        <div id="costsBenefitsResults">
-          <!-- Summary and combined chart will render here -->
-        </div>
-        <div class="modelling-assumptions">
-          <h3><i class="fa-solid fa-lightbulb"></i> Modelling Assumptions</h3>
+      <!-- POLICY BUILDER TAB -->
+      <section id="tab-policy" class="tab-panel" aria-label="Policy builder">
+        <div class="card card--wide">
+          <h2>Configure a vaccine mandate policy</h2>
           <p>
-            This analysis uses a fixed implementation cost of $200&nbsp;000 per 100&nbsp;000 population (for outreach, IT verification and enforcement) 
-            and a variable cost of $50 per person vaccinated (vaccine doses, administration and logistics). Health benefits are monetized at $50&nbsp;000 per QALY gained, 
-            reflecting common willingness‐to‐pay thresholds in economic evaluations. For context, regulatory bodies often apply a Value of a Statistical Life around A$5–6 million, 
-            which corresponds to ~20 QALYs at A$250&nbsp;000 each. Results vary with outbreak severity: mandates generate substantial net benefits in high‐risk (severe) scenarios 
-            but may be cost‐inefficient during mild or contained outbreaks.
+            Choose the combination of mandate features you would like to evaluate. The
+            predictions are based on support for having <strong>some mandate in place</strong>
+            versus <strong>no mandate</strong>; there is no separate “uptake for A” or “uptake for B”.
+          </p>
+          <div class="policy-grid">
+            <div class="policy-group">
+              <label for="scopeSelect">Who would be covered by the mandate?</label>
+              <select id="scopeSelect"></select>
+              <p class="hint">
+                Broader mandates (e.g. all adults) generally reduce support relative to
+                narrower mandates that focus on high-risk groups.
+              </p>
+            </div>
+
+            <div class="policy-group">
+              <label for="exemptionsSelect">What exemptions are allowed?</label>
+              <select id="exemptionsSelect"></select>
+              <p class="hint">
+                Allowing only medical exemptions is typically seen as stricter than allowing
+                both medical and religious exemptions.
+              </p>
+            </div>
+
+            <div class="policy-group">
+              <label for="coverageSelect">
+                Vaccination coverage required before the mandate ends
+              </label>
+              <select id="coverageSelect"></select>
+              <p class="hint">
+                Higher coverage thresholds signal a longer mandate and can require stronger
+                justification in terms of lives saved.
+              </p>
+            </div>
+
+            <div class="policy-group">
+              <label for="livesSaved">
+                Additional lives saved compared with no mandate
+              </label>
+              <input
+                type="range"
+                id="livesSaved"
+                min="10"
+                max="40"
+                step="5"
+              />
+              <div class="slider-value">
+                <span id="livesSavedValue">—</span>
+              </div>
+              <p class="hint">
+                This represents extra lives saved per 100&nbsp;000 people due to the mandate
+                (e.g. through higher vaccination coverage).
+              </p>
+            </div>
+          </div>
+
+          <div class="policy-actions">
+            <button id="resetPolicyButton" type="button" class="btn-secondary">
+              Reset to scenario defaults
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESULTS TAB -->
+      <section id="tab-results" class="tab-panel" aria-label="Impact & support">
+        <div class="card-grid">
+          <section class="card card--wide">
+            <h2>Predicted support for this mandate</h2>
+            <p>
+              For the selected country, outbreak scenario and policy configuration, the mixed logit
+              model predicts the share of respondents who would
+              <strong>support having some mandate</strong> versus those who would
+              <strong>prefer no mandate</strong>.
+            </p>
+            <div class="chart-container">
+              <canvas id="supportChart" aria-label="Predicted support vs no mandate" role="img"></canvas>
+            </div>
+            <p id="supportSummaryText" class="muted">
+              Choose a country, scenario and policy design to view predicted support.
+            </p>
+          </section>
+
+          <section class="card">
+            <h3>Key indicators</h3>
+            <dl class="kpi-grid">
+              <div>
+                <dt>Support mandate</dt>
+                <dd id="supportRate">—</dd>
+              </div>
+              <div>
+                <dt>Prefer no mandate</dt>
+                <dd id="noMandateRate">—</dd>
+              </div>
+              <div>
+                <dt>Odds ratio (support vs no mandate)</dt>
+                <dd id="supportOdds">—</dd>
+              </div>
+              <div>
+                <dt>Sample size</dt>
+                <dd id="sampleSize">—</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="card">
+            <h3>Preference segments for this scenario</h3>
+            <p>
+              The latent class model identifies mandate supporters and mandate resisters in each
+              country. Shares are based on the MandEval DCE and can be updated as new estimates
+              become available.
+            </p>
+            <ul id="segmentResultsList" class="segment-list"></ul>
+          </section>
+        </div>
+      </section>
+
+      <!-- TRADE-OFFS TAB -->
+      <section id="tab-equivalence" class="tab-panel" aria-label="Trade-offs">
+        <div class="card card--wide">
+          <h2>Trade-offs in terms of lives saved</h2>
+          <p>
+            Using the mixed logit estimates, the table below expresses each mandate attribute
+            level as an equivalent number of <strong>additional lives saved per 100&nbsp;000 people</strong>.
+            These values are based on ratios of attribute coefficients to the
+            <em>lives saved</em> coefficient.
+          </p>
+          <p class="muted">
+            For example, if “all adults” has an equivalent of 30 lives per 100&nbsp;000, the model
+            implies that moving from “high-risk groups only” to “all adults” would need to be offset
+            by saving roughly 30 extra lives per 100&nbsp;000 to keep support at the same level.
+          </p>
+          <div class="table-wrapper">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Attribute</th>
+                  <th>Level (vs reference)</th>
+                  <th>Equivalent lives saved per 100&nbsp;000<br />(95% CI)</th>
+                </tr>
+              </thead>
+              <tbody id="equivalenceTableBody">
+                <tr>
+                  <td colspan="3">Select a country and scenario to view results.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TECHNICAL APPENDIX TAB -->
+      <section id="tab-appendix" class="tab-panel" aria-label="Technical appendix">
+        <div class="card card--wide">
+          <h2>Technical appendix: model structure and worked example</h2>
+
+          <h3>Discrete choice model</h3>
+          <p>
+            The MandEval DCE presents respondents with repeated hypothetical choice tasks between
+            two vaccine mandate options and an explicit <strong>“no mandate”</strong> alternative.
+            Let <code>M</code> denote a mandate with attributes
+            <code>x</code> and <code>N</code> denote the no-mandate option. For the purpose
+            of this policy tool, the focus is on the binary choice between
+            <strong>some mandate</strong> and <strong>no mandate</strong>.
+          </p>
+
+          <p>
+            For each country–scenario combination, the mixed logit model in preference space
+            can be written as:
+          </p>
+          <pre class="math">
+V<sub>Mandate</sub> = β<sub>0</sub> + β<sub>scope</sub> · Scope + β<sub>ex</sub> · Exemptions
+                     + β<sub>cov</sub> · Coverage + β<sub>life</sub> · (LivesSaved / 10)
+
+V<sub>NoMandate</sub> = α<sub>No</sub>
+          </pre>
+          <p>
+            where <code>LivesSaved</code> is expressed as additional lives saved per 100&nbsp;000
+            relative to a base value (here 10 per 100&nbsp;000). The tool uses the estimated
+            coefficient on <code>LivesSaved</code> (per 10-life increment) and the
+            categorical coefficients for scope, exemptions and coverage.
+          </p>
+
+          <p>
+            The probability of supporting a mandate (aggregating over the two labelled mandate
+            options in the original design) is computed as a two-alternative logit:
+          </p>
+          <pre class="math">
+P(Support mandate) = exp(V<sub>Mandate</sub>) / [exp(V<sub>Mandate</sub>) + exp(V<sub>NoMandate</sub>)]
+P(Prefer no mandate) = 1 − P(Support mandate)
+          </pre>
+
+          <h3>Coefficient mapping</h3>
+          <p>
+            In the configuration file (<code>mandeval_config.json</code>), each attribute level is linked
+            to its corresponding model coefficient via a <code>coef_key</code>. For example
+            (Australia, mild outbreak):
+          </p>
+          <pre class="code-snippet">
+"coverage": {
+  "label": "Coverage required before mandate ends",
+  "reference": "70",
+  "levels": {
+    "70": { "label": "70% of the population", "coef_key": null },
+    "80": { "label": "80% of the population", "coef_key": "coverage_80" },
+    "90": { "label": "90% of the population", "coef_key": "coverage_90" }
+  }
+},
+"lives_saved": {
+  "label": "Additional lives saved compared with no mandate",
+  "unit": "lives per 100,000 people",
+  "reference": 10,
+  "min": 10,
+  "max": 40,
+  "step": 5,
+  "coef_key": "lives_saved_10"
+}
+          </pre>
+          <p>
+            The JSON section <code>mxl.coefficients</code> then stores the mean and standard error
+            of each coefficient (to be populated with your exact estimates from the MandEval models):
+          </p>
+          <pre class="code-snippet">
+"coefficients": {
+  "asc_optout":              { "mean": -2.187, "se": 0.160 },
+  "coverage_80":             { "mean":  0.214, "se": 0.055 },
+  "coverage_90":             { "mean":  0.378, "se": 0.070 },
+  "lives_saved_10":          { "mean":  0.023, "se": 0.004 },
+  "scope_all_occupations_public": { "mean": -0.585, "se": 0.090 },
+  "scope_all_adults":        { "mean": -1.020, "se": 0.110 },
+  "exemptions_medical_religious": { "mean":  0.125, "se": 0.060 }
+}
+          </pre>
+          <p>
+            For prediction, the tool uses:
+          </p>
+          <pre class="math">
+V<sub>Mandate</sub> =
+  β<sub>scope(level)</sub> + β<sub>ex(level)</sub> + β<sub>cov(level)</sub> +
+  β<sub>life</sub> · (LivesSaved − 10)/10
+
+V<sub>NoMandate</sub> = α<sub>No</sub> = asc_optout
+          </pre>
+
+          <h3>Worked example (Australia, mild outbreak)</h3>
+          <p>
+            Suppose we consider a mandate in Australia under a mild outbreak with:
+          </p>
+          <ul>
+            <li>Scope: high-risk groups only (reference)</li>
+            <li>Exemptions: medical reasons only (reference)</li>
+            <li>Coverage threshold: 80% (vs 70% reference)</li>
+            <li>Additional lives saved: 25 per 100&nbsp;000 (vs 10 in the reference)</li>
+          </ul>
+          <p>
+            Using the illustrative coefficients above:
+          </p>
+          <pre class="math">
+β<sub>cov(80)</sub> = 0.214
+β<sub>life</sub>    = 0.023  (per 10 lives per 100,000)
+α<sub>No</sub>      = -2.187
+LivesSaved          = 25 (per 100,000)
+Reference           = 10 (per 100,000)
+          </pre>
+
+          <p>
+            The mandate utility becomes:
+          </p>
+          <pre class="math">
+V<sub>Mandate</sub> =
+  0.214                                   (80% vs 70% coverage) +
+  0.023 · (25 − 10) / 10                  (extra lives saved)
+= 0.214 + 0.023 · 1.5
+= 0.214 + 0.0345
+≈ 0.249
+          </pre>
+
+          <p>
+            The no-mandate utility is:
+          </p>
+          <pre class="math">
+V<sub>NoMandate</sub> = -2.187
+          </pre>
+
+          <p>
+            The resulting probabilities are:
+          </p>
+          <pre class="math">
+P(Support mandate)   = exp(0.249) / [exp(0.249) + exp(-2.187)]
+                     ≈ 0.92
+
+P(Prefer no mandate) = 1 − 0.92
+                     ≈ 0.08
+          </pre>
+
+          <p>
+            The tool implements this calculation generically for any combination of scope,
+            exemptions, coverage and lives-saved levels, using the country- and
+            scenario-specific coefficients from <code>mandeval_config.json</code>.
+            To use the exact MandEval results, replace the illustrative coefficient values in
+            the JSON file with the estimates from your final mixed logit and latent class models.
+          </p>
+
+          <h3>Trade-offs in lives saved</h3>
+          <p>
+            For each non-reference level of scope, exemptions and coverage, the tool reports the
+            number of extra lives saved per 100&nbsp;000 that would compensate for that level,
+            holding overall support constant. For an attribute level with coefficient
+            <code>β<sub>j</sub></code> and a lives-saved coefficient
+            <code>β<sub>life</sub></code> (per 10 lives), the equivalent lives saved is:
+          </p>
+          <pre class="math">
+LivesEquivalent<sub>j</sub> =
+  (β<sub>j</sub> / β<sub>life</sub>) · 10   (lives per 100,000)
+          </pre>
+          <p>
+            Approximate 95% confidence intervals are computed using the delta method, assuming
+            independence between coefficients:
+          </p>
+          <pre class="math">
+Var(β<sub>j</sub> / β<sub>life</sub>) ≈ (σ<sub>j</sub> / β<sub>j</sub>)²
+                                      + (σ<sub>life</sub> / β<sub>life</sub>)²
+
+SE(ratio) = |β<sub>j</sub> / β<sub>life</sub>| · √Var(·)
+
+CI<sub>ratio</sub> = (β<sub>j</sub> / β<sub>life</sub>) ± 1.96 · SE(ratio)
+
+CI<sub>Lives</sub> = CI<sub>ratio</sub> · 10
+          </pre>
+        </div>
+      </section>
+
+      <!-- METHODS TAB -->
+      <section id="tab-methods" class="tab-panel" aria-label="Methods & data">
+        <div class="card card--wide">
+          <h2>Methods &amp; data</h2>
+          <p>
+            The tool is calibrated to the MandEval discrete choice experiment on public preferences
+            for COVID-19 vaccine mandates conducted in Australia, Italy and France. Respondents
+            completed repeated choice tasks in which they selected between two mandate options and
+            an explicit “no mandate” alternative under mild and severe outbreak scenarios.
+          </p>
+          <p>
+            Model estimates are based on mixed logit specifications in preference space with
+            respondent-clustered standard errors. The coefficient on additional lives saved is
+            treated as a continuous attribute; scope, exemptions and coverage thresholds are
+            modelled as categorical attributes with clearly defined reference levels.
+          </p>
+          <p>
+            In addition, a latent class logit model identifies at least two preference segments:
+            a majority mandate-supporter class and a smaller mandate-resister class. Segment
+            shares for each country and scenario are stored in <code>lc_segments</code> within
+            <code>mandeval_config.json</code> and are displayed in the
+            <strong>Overview</strong> and <strong>Impact &amp; support</strong> tabs.
+          </p>
+          <p>
+            The current implementation uses the <strong>mean coefficients</strong> from the mixed
+            logit models to generate point predictions for mandate support. To ensure numerical
+            accuracy for your application, paste the final MandEval estimates (means, standard
+            errors and class shares) into <code>mandeval_config.json</code> for each
+            country–scenario combination.
           </p>
         </div>
-        <div class="cost-icons">
-          <button class="buttons-row" onclick="toggleCostBreakdown()">Cost Breakdown</button>
-          <button class="buttons-row" onclick="toggleBenefitsAnalysis()">Benefits Analysis</button>
-        </div>
-        <div id="detailedCostBreakdown" class="cost-cards" style="display: none;">
-          <!-- Cost breakdown cards will be injected here by the script -->
-        </div>
-        <div id="detailedBenefitsAnalysis" class="cost-cards" style="display: none;">
-          <div class="cost-card">
-            <h4><i class="fa-solid fa-hand-holding-dollar"></i> QALY Benefits Calculation</h4>
-            <p>Calculated as: (Lives Saved × QALYs per life) × Value per QALY. For example, if 10 lives are saved and each life equals 10 QALYs, at €50,000 per QALY the benefit is €5,000,000.</p>
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
+    </main>
 
-    <!-- Saved Scenarios Tab -->
-    <section id="scenariosTab" class="tabcontent" tabindex="0">
-      <div class="calculation-info">
-        <h4>Saved Scenarios</h4>
-        <p>Each saved scenario appears as a row in the table, listing the inputs and outputs. You can compare outcomes across countries or policy configurations. 
-           Use the buttons below to add the current scenario to the list, or to export all scenarios in a PDF report.</p>
-        <div class="buttons-row">
-          <button onclick="saveScenario()">Save Current Scenario</button>
-          <button onclick="openComparison()">Compare &amp; Export to PDF</button>
-        </div>
-        <div class="table-container">
-          <table id="scenarioTable">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Country</th>
-                <th>Scenario</th>
-                <th>Lives Saved<br/>(per 100k)</th>
-                <th>All Occ.?</th>
-                <th>Med+Rel.?</th>
-                <th>Broad?</th>
-                <th>70%?</th>
-                <th>90%?</th>
-                <th>Uptake (%)</th>
-                <th>Net Benefit</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- Video Demo Tab -->
-    <section id="demoTab" class="tabcontent" tabindex="0">
-      <div class="calculation-info">
-        <h4>Video Demonstration</h4>
-        <div class="video-container">
-          <div style="padding:56.25% 0 0 0;position:relative;">
-            <iframe src="https://player.vimeo.com/video/1107399340?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
-                    frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-                    referrerpolicy="strict-origin-when-cross-origin"
-                    style="position:absolute;top:0;left:0;width:100%;height:100%;"
-                    title="VaxMandate Decision Aid Tool - Optimise Vaccine Mandates">
-            </iframe>
-          </div>
-          <script src="https://player.vimeo.com/api/player.js"></script>
-        </div>
-      </div>
-    </section>
-
-    <footer>
-      <p>&copy; 2025 Vaccine Mandate Policy Simulator. All Rights Reserved.<br/>Mesfin Genie, Newcastle Business School, The University of Newcastle, Australia</p>
+    <footer class="app-footer">
+      <p>MandEval Vaccine Mandate Policy Tool &middot; Version 1.1</p>
     </footer>
   </div>
 
-  <script src="script.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
