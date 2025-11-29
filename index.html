@@ -1,508 +1,1103 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>MandEval Vaccine Mandate Policy Aid</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <title>MandEval Vaccine Mandate Decision Aid</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- jsPDF -->
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-  <div class="app">
-    <header class="app-header">
-      <div class="app-header__title-block">
-        <h1>MandEval Vaccine Mandate Policy Tool</h1>
-        <p class="app-header__subtitle">
-          Explore how alternative vaccine mandate designs affect predicted public support
-          in Australia, Italy and France under mild and severe COVID-19 outbreak scenarios.
-        </p>
-      </div>
-      <div class="app-header__selectors">
-        <div class="control">
-          <label for="countrySelect">Country</label>
-          <select id="countrySelect"></select>
+<header class="app-header">
+    <div class="app-header-left">
+        <div class="app-logo-circle">M</div>
+        <div>
+            <h1 class="app-title">MandEval</h1>
+            <p class="app-subtitle">Multi-country vaccine mandate decision aid tool</p>
         </div>
-        <div class="control">
-          <label for="scenarioSelect">Outbreak scenario</label>
-          <select id="scenarioSelect"></select>
+    </div>
+    <div class="app-header-right">
+        <span class="badge-primary">Policy decision aid</span>
+        <span class="badge-outline">Version 1.0</span>
+    </div>
+</header>
+
+<main class="app-shell">
+    <nav class="tab-bar">
+        <button class="tab-link active" data-tab="intro">Introduction</button>
+        <button class="tab-link" data-tab="attributes">Attributes</button>
+        <button class="tab-link" data-tab="config">Configuration</button>
+        <button class="tab-link" data-tab="results">Results</button>
+        <button class="tab-link" data-tab="impact">Impact & cost</button>
+        <button class="tab-link" data-tab="natsim">National simulation</button>
+        <button class="tab-link" data-tab="scenarios">Saved scenarios</button>
+        <button class="tab-link" data-tab="about">About MandEval</button>
+        <button class="tab-link" data-tab="technical">Advanced and methods</button>
+    </nav>
+
+    <!-- INTRO TAB -->
+    <section id="tab-intro" class="tab-panel active">
+        <div class="grid-two">
+            <div class="card">
+                <h2>What MandEval does</h2>
+                <p>
+                    MandEval brings together discrete choice evidence on public preferences for COVID-19 vaccine
+                    mandates with simple assumptions on lives saved and implementation costs. It is designed for
+                    quick exploration of mandate options in Australia, France and Italy under mild or severe
+                    outbreak scenarios.
+                </p>
+                <ul class="plain-list">
+                    <li>Uses mixed logit and latent class models estimated from a large multi-country DCE.</li>
+                    <li>
+                        Predicts support for a given mandate versus no mandate, for each country and outbreak
+                        scenario.
+                    </li>
+                    <li>
+                        Converts mandate features into welfare-equivalent lives saved using willingness-to-save-lives
+                        estimates and compares these with simple cost assumptions.
+                    </li>
+                </ul>
+                <p>
+                    Users can configure mandate scope, exemptions and coverage thresholds, see support versus opt-out,
+                    and combine lives saved with simple value-of-statistical-life assumptions for briefing and
+                    case discussions.
+                </p>
+            </div>
+            <div class="card">
+                <h2>How to use this tool</h2>
+                <ol class="plain-list numbered">
+                    <li>
+                        Go to the <strong>Configuration</strong> tab and choose country, outbreak scenario,
+                        mandate scope, exemption policy, coverage threshold and expected lives saved per
+                        100,000 people.
+                    </li>
+                    <li>
+                        Enter the approximate population covered, an average implementation cost per person,
+                        and an indicative value per life saved in local currency.
+                    </li>
+                    <li>
+                        Select the preference model: the full-sample mixed logit or the latent class groups
+                        (supportive or resister).
+                    </li>
+                    <li>
+                        Click <strong>Apply configuration</strong> and then <strong>View results</strong> to see
+                        headline support, welfare-equivalent lives saved and net monetary benefit.
+                    </li>
+                    <li>
+                        Save promising mandate options in the <strong>Saved scenarios</strong> tab and download
+                        them to Excel or as a short policy brief PDF.
+                    </li>
+                    <li>
+                        For workshops and sensitivity checks, use the <strong>Advanced and methods</strong> tab
+                        to adjust the display exchange rate and open the technical appendix.
+                    </li>
+                </ol>
+                <p class="note">
+                    MandEval is optimised for laptops, desktops and tablets but also works on mobile devices
+                    for live use in policy meetings.
+                </p>
+            </div>
         </div>
-      </div>
-    </header>
+    </section>
 
-    <main class="app-main">
-      <div id="errorMessage" class="error-message" aria-live="polite"></div>
-
-      <section class="controls controls--tabs">
-        <nav class="tabs" aria-label="Tool sections">
-          <button class="tab-button tab-button--active" data-tab-target="tab-overview">
-            Overview
-          </button>
-          <button class="tab-button" data-tab-target="tab-policy">
-            Policy builder
-          </button>
-          <button class="tab-button" data-tab-target="tab-results">
-            Impact &amp; support
-          </button>
-          <button class="tab-button" data-tab-target="tab-equivalence">
-            Trade-offs
-          </button>
-          <button class="tab-button" data-tab-target="tab-appendix">
-            Technical appendix
-          </button>
-          <button class="tab-button" data-tab-target="tab-methods">
-            Methods &amp; data
-          </button>
-        </nav>
-      </section>
-
-      <!-- OVERVIEW TAB -->
-      <section id="tab-overview" class="tab-panel tab-panel--active" aria-label="Overview">
-        <div class="card-grid">
-          <section class="card card--wide">
-            <h2>What this tool does</h2>
+    <!-- ATTRIBUTES TAB -->
+    <section id="tab-attributes" class="tab-panel">
+        <div class="card">
+            <h2>Attributes and levels in the MandEval DCE</h2>
             <p>
-              This tool uses discrete choice experiment (DCE) estimates from the MandEval study to
-              predict how different vaccine mandate designs affect the probability that people
-              <strong>support having some mandate</strong> versus <strong>prefer no mandate</strong>.
+                The discrete choice experiment asked adults in Australia, France and Italy to choose between
+                two vaccine mandate policies and a “no mandate” option. Each policy was defined by the
+                attributes below. The decision aid focuses on the policy versus no mandate dimension and does
+                not distinguish between left and right layouts.
+            </p>
+            <div class="attributes-grid">
+                <div class="attr-card">
+                    <h3>Scope of mandate</h3>
+                    <p>Which groups are required to be vaccinated.</p>
+                    <ul class="plain-list">
+                        <li><strong>High-risk occupations only</strong> (reference): mandates limited to
+                            groups such as healthcare workers or emergency responders.
+                        </li>
+                        <li><strong>All occupations and public spaces</strong>: everyone working or entering
+                            public venues (cinemas, malls, restaurants, public transport) must be vaccinated.
+                        </li>
+                    </ul>
+                </div>
+                <div class="attr-card">
+                    <h3>Exemption policy</h3>
+                    <p>Who can be exempted from the mandate.</p>
+                    <ul class="plain-list">
+                        <li><strong>Medical only</strong> (reference): exemptions only for certified medical
+                            reasons.
+                        </li>
+                        <li><strong>Medical + religious</strong>: exemptions for medical reasons or documented
+                            religious beliefs.
+                        </li>
+                        <li><strong>Medical + religious + personal belief</strong>: exemptions also allowed
+                            for strong personal objections.
+                        </li>
+                    </ul>
+                </div>
+                <div class="attr-card">
+                    <h3>Coverage requirement to lift mandate</h3>
+                    <p>
+                        Share of the population that must be vaccinated before the mandate is removed.
+                    </p>
+                    <ul class="plain-list">
+                        <li><strong>50% of population</strong> (reference): mandate lifted once half the
+                            population is vaccinated.
+                        </li>
+                        <li><strong>70% of population</strong>: mandate lifted once most people are
+                            vaccinated and life is close to normal.
+                        </li>
+                        <li><strong>90% of population</strong>: mandate lifted once almost everyone is
+                            vaccinated.
+                        </li>
+                    </ul>
+                </div>
+                <div class="attr-card">
+                    <h3>Estimated lives saved</h3>
+                    <p>
+                        Expected number of deaths averted per 100,000 people by introducing the mandate, compared
+                        with no mandate and relying on voluntary vaccination.
+                    </p>
+                    <ul class="plain-list">
+                        <li><strong>10 lives per 100,000</strong>.</li>
+                        <li><strong>25 lives per 100,000</strong>.</li>
+                        <li><strong>35 lives per 100,000</strong>.</li>
+                        <li><strong>40 lives per 100,000</strong>.</li>
+                    </ul>
+                </div>
+            </div>
+            <p class="note">
+                High-risk occupations, medical-only exemptions, a 50 percent coverage threshold and the lowest
+                lives-saved value form the baseline levels in the econometric models. The alternative-specific
+                constant for Policy A captures left–right layout effects and is not used in MandEval’s
+                prediction of support. The decision aid focuses on the policy versus no mandate comparison and
+                therefore uses the no mandate constant and the attribute coefficients when predicting support
+                for “some mandate” versus “no mandate”.
+            </p>
+        </div>
+    </section>
+
+    <!-- CONFIG TAB -->
+    <section id="tab-config" class="tab-panel">
+        <div class="grid-two-stretch">
+            <div class="card">
+                <h2>Configure a vaccine mandate policy</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="country">
+                            Country
+                            <span class="info-icon"
+                                  title="Select the country whose preference estimates you want to use. Models are estimated separately for Australia, France and Italy.">i</span>
+                        </label>
+                        <select id="country">
+                            <option value="australia">Australia</option>
+                            <option value="france">France</option>
+                            <option value="italy">Italy</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="outbreak">
+                            Outbreak scenario
+                            <span class="info-icon"
+                                  title="Mild scenarios reflect lower mortality and pressure on the health system; severe scenarios reflect higher mortality and stronger pressure.">i</span>
+                        </label>
+                        <select id="outbreak">
+                            <option value="mild">Mild outbreak</option>
+                            <option value="severe">Severe outbreak</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="scope">
+                            Scope of mandate
+                            <span class="info-icon"
+                                  title="Decides whether the mandate is limited to high-risk occupations or extends to all occupations and public spaces.">i</span>
+                        </label>
+                        <select id="scope">
+                            <option value="high_risk">High-risk occupations only</option>
+                            <option value="all">All occupations and public spaces</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="exemptions">
+                            Exemption policy
+                            <span class="info-icon"
+                                  title="Defines who can be exempted from vaccination requirements: only medical exemptions, medical plus religious, or also personal belief exemptions.">i</span>
+                        </label>
+                        <select id="exemptions">
+                            <option value="medical">Medical only</option>
+                            <option value="med_relig">Medical + religious</option>
+                            <option value="med_rel_pers">Medical + religious + personal belief</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="coverage">
+                            Coverage requirement to lift mandate
+                            <span class="info-icon"
+                                  title="Share of the population that must be vaccinated before the mandate is removed. Higher thresholds keep the mandate in place for longer.">i</span>
+                        </label>
+                        <select id="coverage">
+                            <option value="50">50% population vaccinated</option>
+                            <option value="70">70% population vaccinated</option>
+                            <option value="90">90% population vaccinated</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lives-slider">
+                            Expected lives saved per 100,000
+                            <span class="info-icon"
+                                  title="Number of deaths averted per 100,000 people when the mandate is introduced, relative to no mandate. The slider covers the values used in the discrete choice experiment.">i</span>
+                        </label>
+                        <input type="range" id="lives-slider" min="10" max="40" step="5" value="25">
+                        <div class="slider-value">
+                            <span id="lives-display">25 lives per 100,000</span>
+                            <span class="slider-hint">
+                                Values match the experiment (10, 25, 35, 40 lives per 100,000). Intermediate
+                                settings linearly interpolate in the models.
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="population">
+                            Population covered (millions)
+                            <span class="info-icon"
+                                  title="Approximate number of people who would fall under the mandate in this scenario. For example, adults or the whole population.">i</span>
+                        </label>
+                        <input type="number" id="population" min="0.1" step="0.1" value="25">
+                        <p class="hint">
+                            Lives saved nationally are calculated by multiplying welfare-equivalent lives saved per
+                            100,000 by this population.
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cost-per-person">
+                            Implementation cost per person per year
+                            (<span id="currency-label">Local currency</span>)
+                            <span class="info-icon"
+                                  title="Average annual cost of implementing and enforcing the mandate per person covered (e.g., communication, administration, enforcement).">i</span>
+                        </label>
+                        <input type="number" id="cost-per-person" min="0" step="1" value="20">
+                        <p class="hint">
+                            Total implementation cost is this value multiplied by the population covered.
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="value-per-life">
+                            Value per life saved
+                            (<span id="currency-label-2">Local currency</span>)
+                            <span class="info-icon"
+                                  title="Indicative monetary value attached to preventing one death. Used to translate lives saved into monetary benefits for cost–benefit comparisons.">i</span>
+                        </label>
+                        <input type="number" id="value-per-life" min="0" step="100000" value="5000000">
+                        <p class="hint">
+                            Can be interpreted as a value-of-statistical-life measure or an aggregate value per
+                            life saved agreed in policy discussions.
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Preference model</label>
+                        <div class="pill-toggle-group">
+                            <button type="button" class="pill-toggle active" data-model="mxl">
+                                Average mixed logit
+                            </button>
+                            <button type="button" class="pill-toggle" data-model="lc2">
+                                Supportive group (latent class)
+                            </button>
+                            <button type="button" class="pill-toggle" data-model="lc1">
+                                Resister group (latent class)
+                            </button>
+                        </div>
+                        <p class="hint">
+                            The supportive group uses Class 2 from the latent class model, representing respondents
+                            who are generally more in favour of mandates. The resister group uses Class 1 from the
+                            same model, representing respondents who are more sceptical about mandates. In this build
+                            you can add your Class&nbsp;1 coefficients in <code>DCE_PARAMS_LC1</code> in the JavaScript
+                            file to activate the resister view.
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Currency display</label>
+                        <div class="pill-toggle-group">
+                            <button type="button" class="pill-toggle active" data-currency="LOCAL">
+                                Local currency
+                            </button>
+                            <button type="button" class="pill-toggle" data-currency="USD">
+                                Approximate USD
+                            </button>
+                        </div>
+                        <p class="hint">
+                            All calculations are made in local currency (AUD or EUR, depending on country). USD
+                            values use a simple exchange rate for display only.
+                        </p>
+                    </div>
+
+                    <div class="form-group form-group-wide">
+                        <label for="scenario-name">Scenario name</label>
+                        <input type="text" id="scenario-name"
+                               placeholder="For example: Broad scope, 70% threshold, severe outbreak">
+                    </div>
+
+                    <div class="form-group form-group-wide">
+                        <label for="scenario-notes">Scenario notes</label>
+                        <textarea id="scenario-notes" rows="3"
+                                  placeholder="Optional notes for reports, policy memos and meeting agendas."></textarea>
+                    </div>
+                </div>
+
+                <div class="button-row">
+                    <button id="update-results" class="btn-primary">Apply configuration</button>
+                    <button id="open-snapshot" class="btn-secondary">View results</button>
+                    <button id="save-scenario" class="btn-ghost">Save scenario</button>
+                </div>
+            </div>
+
+            <div class="card card-secondary">
+                <h2>Current configuration at a glance</h2>
+                <div id="config-summary" class="config-summary"></div>
+                <hr class="divider">
+                <div class="config-endorsement-row">
+                    <span class="metric-label">Support mandate (current model)</span>
+                    <span class="metric-value config-endorsement-value" id="config-endorsement-value">
+                        Apply configuration
+                    </span>
+                </div>
+                <h3>Headline recommendation</h3>
+                <p id="headline-recommendation" class="headline-text">
+                    Apply a configuration to see a concise recommendation.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- RESULTS TAB -->
+    <section id="tab-results" class="tab-panel">
+        <div class="grid-three">
+            <div class="card">
+                <h2>Mandate support and opt-out</h2>
+                <p class="hint">
+                    These percentages are obtained by plugging the selected mandate into the mixed logit or
+                    latent class model and comparing the utility of “some mandate” with “no mandate”.
+                </p>
+                <div class="metric-pair">
+                    <div>
+                        <span class="metric-label">Support mandate</span>
+                        <span class="metric-value" id="support-rate">-</span>
+                    </div>
+                    <div>
+                        <span class="metric-label">Prefer no mandate</span>
+                        <span class="metric-value" id="optout-rate">-</span>
+                    </div>
+                </div>
+                <div class="chart-block">
+                    <canvas id="chart-uptake"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Lives saved per 100,000</h2>
+                <p class="hint">
+                    The direct lives saved attribute is adjusted using willingness-to-save-lives estimates, which
+                    convert scope, exemptions and coverage thresholds into equivalent changes in lives saved.
+                </p>
+                <div class="metric-pair">
+                    <div>
+                        <span class="metric-label">Direct lives saved</span>
+                        <span class="metric-value" id="direct-lives">-</span>
+                    </div>
+                    <div>
+                        <span class="metric-label">Adjustment from policy design</span>
+                        <span class="metric-value" id="wts-adjustment">-</span>
+                    </div>
+                </div>
+                <div class="metric-single">
+                    <span class="metric-label">Welfare-equivalent lives saved</span>
+                    <span class="metric-value" id="equiv-lives">-</span>
+                </div>
+                <div class="chart-block">
+                    <canvas id="chart-lives"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>National impact and net benefit</h2>
+                <p class="hint">
+                    Lives saved are translated into monetary benefits using the chosen value per life saved and
+                    compared with implementation costs for the selected population.
+                </p>
+                <div class="metric-pair">
+                    <div>
+                        <span class="metric-label">Welfare-equivalent lives saved (national)</span>
+                        <span class="metric-value" id="national-lives">-</span>
+                    </div>
+                    <div>
+                        <span class="metric-label">Value of lives saved</span>
+                        <span class="metric-value" id="value-lives">-</span>
+                    </div>
+                </div>
+                <div class="metric-pair">
+                    <div>
+                        <span class="metric-label">Implementation cost</span>
+                        <span class="metric-value" id="national-cost">-</span>
+                    </div>
+                    <div>
+                        <span class="metric-label">Net monetary benefit</span>
+                        <span class="metric-value" id="national-net-benefit">-</span>
+                    </div>
+                </div>
+                <div class="metric-single">
+                    <span class="metric-label">Benefit cost ratio</span>
+                    <span class="metric-value" id="bcr">-</span>
+                </div>
+                <div class="chart-block">
+                    <canvas id="chart-bcr"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- IMPACT / COST TAB -->
+    <section id="tab-impact" class="tab-panel">
+        <div class="grid-two-stretch">
+            <div class="card">
+                <h2>Implementation and valuation assumptions</h2>
+                <p>
+                    MandEval does not prescribe any particular value-of-statistical-life or cost estimates.
+                    Instead, it allows users to plug in simple assumptions that are transparent and easy to
+                    explain in meetings.
+                </p>
+                <p>
+                    Implementation cost per person is treated as an average across people covered by the
+                    mandate. This can include communication, administration, enforcement and other programme
+                    costs. The value per life saved converts lives saved into monetary benefits for a
+                    high-level cost–benefit comparison.
+                </p>
+                <p>
+                    For each configuration the tool calculates:
+                </p>
+                <ul class="plain-list">
+                    <li>Total implementation cost = cost per person × population covered.</li>
+                    <li>Total value of lives saved = welfare-equivalent lives saved × value per life saved.</li>
+                    <li>Net monetary benefit = value of lives saved − implementation cost.</li>
+                    <li>Benefit cost ratio = value of lives saved ÷ implementation cost.</li>
+                </ul>
+                <p class="note">
+                    These calculations are intended for quick exploration and communication. Detailed economic
+                    evaluation should use richer epidemiological and costing models alongside the preference
+                    evidence.
+                </p>
+            </div>
+
+            <div class="card card-secondary">
+                <h2>Key numbers for this configuration</h2>
+                <div class="metric-pair">
+                    <div>
+                        <span class="metric-label">Population covered</span>
+                        <span class="metric-value" id="impact-population">-</span>
+                    </div>
+                    <div>
+                        <span class="metric-label">Cost per person</span>
+                        <span class="metric-value" id="impact-cost-per-person">-</span>
+                    </div>
+                </div>
+                <div class="metric-pair">
+                    <div>
+                        <span class="metric-label">Value per life saved</span>
+                        <span class="metric-value" id="impact-value-per-life">-</span>
+                    </div>
+                    <div>
+                        <span class="metric-label">Total implementation cost</span>
+                        <span class="metric-value" id="impact-total-cost">-</span>
+                    </div>
+                </div>
+                <div class="metric-single">
+                    <span class="metric-label">Total value of lives saved</span>
+                    <span class="metric-value" id="impact-total-value">-</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NATIONAL SIMULATION TAB -->
+    <section id="tab-natsim" class="tab-panel">
+        <div class="card">
+            <h2>National simulation and sensitivity</h2>
+            <p>
+                This view re-states the national impact for the current configuration and is intended for quick
+                business case discussions. Sensitivity checks can be carried out by adjusting population,
+                implementation cost, value per life saved, and the welfare-equivalent lives saved through the
+                policy design.
+            </p>
+            <div class="grid-two">
+                <div>
+                    <h3>National monetary picture</h3>
+                    <div class="metric-pair">
+                        <div>
+                            <span class="metric-label">Total value of lives saved</span>
+                            <span class="metric-value" id="sim-total-value">-</span>
+                        </div>
+                        <div>
+                            <span class="metric-label">Total implementation cost</span>
+                            <span class="metric-value" id="sim-total-cost">-</span>
+                        </div>
+                    </div>
+                    <div class="metric-pair">
+                        <div>
+                            <span class="metric-label">National net benefit</span>
+                            <span class="metric-value" id="sim-net-benefit">-</span>
+                        </div>
+                        <div>
+                            <span class="metric-label">National benefit cost ratio</span>
+                            <span class="metric-value" id="sim-bcr">-</span>
+                        </div>
+                    </div>
+                    <p class="hint">
+                        Because results are linear in population, the benefit–cost ratio does not change when
+                        scaling up, but total costs and benefits do.
+                    </p>
+                </div>
+                <div>
+                    <h3>National health impact</h3>
+                    <div class="metric-single">
+                        <span class="metric-label">Welfare-equivalent lives saved (national)</span>
+                        <span class="metric-value" id="sim-total-lives">-</span>
+                    </div>
+                    <p class="hint">
+                        National lives saved are obtained by multiplying welfare-equivalent lives saved per
+                        100,000 by the population covered. Policy teams can later align these with more
+                        detailed epidemiological models.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCENARIOS TAB -->
+    <section id="tab-scenarios" class="tab-panel">
+        <div class="card">
+            <h2>Saved scenarios for comparison</h2>
+            <p>
+                Use this table to compare mandate options and support discussions with ministries and partners.
+                Saved scenarios are also used for Excel and PDF downloads.
+            </p>
+            <div class="button-row">
+                <button id="export-excel" class="btn-secondary">Download scenarios to Excel</button>
+                <button id="export-pdf" class="btn-secondary">Download policy brief PDF</button>
+            </div>
+            <div class="table-wrapper">
+                <table id="scenario-table">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Country</th>
+                        <th>Outbreak</th>
+                        <th>Scope</th>
+                        <th>Exemptions</th>
+                        <th>Coverage</th>
+                        <th>Lives saved (per 100k)</th>
+                        <th>Equiv. lives (per 100k)</th>
+                        <th>Preference model</th>
+                        <th>Support mandate</th>
+                        <th>BCR</th>
+                        <th>Net benefit</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ABOUT TAB -->
+    <section id="tab-about" class="tab-panel">
+        <div class="card">
+            <h2>About MandEval</h2>
+            <p>
+                MandEval is part of a wider programme of work on COVID-19 vaccine mandates in Australia, France
+                and Italy. It translates discrete choice experiment results into an interactive decision aid that
+                can be used in policy workshops, teaching and public health discussions.
             </p>
             <p>
-              Select a country and outbreak scenario at the top. Then use the
-              <strong>Policy builder</strong> tab to choose:
+                The tool is intended to support ministries, public health agencies and partners as they
+                explore mandate options under different outbreak scenarios. It helps answer questions such as:
             </p>
-            <ul>
-              <li>Who would be covered by the mandate</li>
-              <li>Which exemptions are allowed</li>
-              <li>Vaccination coverage required before mandates end</li>
-              <li>Expected additional lives saved per 100&nbsp;000 people</li>
+            <ul class="plain-list">
+                <li>How does support for mandates change when scope, exemptions or coverage thresholds change?</li>
+                <li>How many welfare-equivalent lives are saved by different mandate designs?</li>
+                <li>How do simple cost and valuation assumptions affect net benefit and benefit–cost ratios?</li>
             </ul>
+            <p class="note">
+                Prepared by <strong>Mesfin Genie, PhD</strong>, Newcastle Business School, The University of
+                Newcastle, Australia. For questions or adaptation requests please contact
+                <a href="mailto:mesfin.genie@newcastle.edu.au">mesfin.genie@newcastle.edu.au</a>.
+            </p>
+        </div>
+    </section>
+
+    <!-- TECHNICAL / ADVANCED TAB -->
+    <section id="tab-technical" class="tab-panel">
+        <div class="card">
+            <h2>Advanced settings for workshops</h2>
             <p>
-              The <strong>Impact &amp; support</strong> tab then shows predicted support for
-              mandates. The <strong>Trade-offs</strong> tab reports how many additional lives saved per
-              100&nbsp;000 people are, in the model, equivalent to changes in mandate scope or
-              exemptions.
+                This panel allows technical users to adjust the exchange rate used for USD display without
+                editing the code. All calculations remain in local currency (AUD or EUR), but charts and
+                summaries can be shown in either local currency or approximate USD.
             </p>
-          </section>
+            <p class="note">
+                Hooks are included to read an external <code>epi_config.json</code> file for future extensions
+                (for example, to store country-specific valuation or epidemiological multipliers), although the
+                current MandEval build does not yet use these values in calculations.
+            </p>
+            <form id="advanced-settings-form" class="form-grid">
+                <div class="form-group form-group-wide">
+                    <label for="adv-local-per-usd">
+                        Exchange rate for display (local currency per USD)
+                        <span class="info-icon"
+                              title="Used only to convert local currency values into USD for display. Changing this does not affect calculations, only USD labels.">i</span>
+                    </label>
+                    <input type="number" id="adv-local-per-usd" step="0.1" min="0.1" max="500">
+                    <p class="hint">
+                        For example, if one USD is worth 1.5 local currency units, enter 1.5.
+                    </p>
+                </div>
 
-          <section class="card">
-            <h2>Sample &amp; design (current view)</h2>
-            <dl class="kpi-grid">
-              <div>
-                <dt>Respondents</dt>
-                <dd id="sampleSizeOverview">—</dd>
-              </div>
-              <div>
-                <dt>Choice tasks per person</dt>
-                <dd id="tasksPerPersonOverview">—</dd>
-              </div>
-              <div>
-                <dt>Total analysed choices</dt>
-                <dd id="totalChoicesOverview">—</dd>
-              </div>
-            </dl>
-            <h3>Model diagnostics</h3>
-            <dl class="kpi-grid">
-              <div>
-                <dt>Model</dt>
-                <dd id="modelNameOverview">Mixed logit (preference space)</dd>
-              </div>
-              <div>
-                <dt>Log-likelihood</dt>
-                <dd id="logLikOverview">—</dd>
-              </div>
-              <div>
-                <dt>AIC</dt>
-                <dd id="aicOverview">—</dd>
-              </div>
-            </dl>
-          </section>
+                <div class="form-group form-group-wide">
+                    <div class="button-row">
+                        <button type="button" id="advanced-apply" class="btn-primary">Apply advanced settings</button>
+                        <button type="button" id="advanced-reset" class="btn-ghost">Reset to defaults</button>
+                    </div>
+                </div>
+            </form>
+        </div>
 
-          <section class="card">
-            <h2>Preference segments</h2>
+        <div class="card">
+            <h2>Technical appendix</h2>
             <p>
-              Latent class analysis identifies at least two preference segments in each country:
-              a majority <strong>mandate-supporter</strong> group and a smaller
-              <strong>mandate-resister</strong> group.
+                The technical appendix explains how MandEval uses discrete choice experiment estimates,
+                willingness-to-save-lives measures and simple cost assumptions. It sets out the utility
+                specification, the mixed logit and latent class models, and the steps from utilities to
+                mandate support, welfare-equivalent lives saved and benefit–cost ratios.
             </p>
-            <ul id="segmentOverviewList" class="segment-list"></ul>
-          </section>
-        </div>
-      </section>
-
-      <!-- POLICY BUILDER TAB -->
-      <section id="tab-policy" class="tab-panel" aria-label="Policy builder">
-        <div class="card card--wide">
-          <h2>Configure a vaccine mandate policy</h2>
-          <p>
-            Choose the combination of mandate features you would like to evaluate. The
-            predictions are based on support for having <strong>some mandate in place</strong>
-            versus <strong>no mandate</strong>; there is no separate “uptake for A” or “uptake for B”.
-          </p>
-          <div class="policy-grid">
-            <div class="policy-group">
-              <label for="scopeSelect">Who would be covered by the mandate?</label>
-              <select id="scopeSelect"></select>
-              <p class="hint">
-                Broader mandates (e.g. all adults) generally reduce support relative to
-                narrower mandates that focus on high-risk groups.
-              </p>
-            </div>
-
-            <div class="policy-group">
-              <label for="exemptionsSelect">What exemptions are allowed?</label>
-              <select id="exemptionsSelect"></select>
-              <p class="hint">
-                Allowing only medical exemptions is typically seen as stricter than allowing
-                both medical and religious exemptions.
-              </p>
-            </div>
-
-            <div class="policy-group">
-              <label for="coverageSelect">
-                Vaccination coverage required before the mandate ends
-              </label>
-              <select id="coverageSelect"></select>
-              <p class="hint">
-                Higher coverage thresholds signal a longer mandate and can require stronger
-                justification in terms of lives saved.
-              </p>
-            </div>
-
-            <div class="policy-group">
-              <label for="livesSaved">
-                Additional lives saved compared with no mandate
-              </label>
-              <input
-                type="range"
-                id="livesSaved"
-                min="10"
-                max="40"
-                step="5"
-              />
-              <div class="slider-value">
-                <span id="livesSavedValue">—</span>
-              </div>
-              <p class="hint">
-                This represents extra lives saved per 100&nbsp;000 people due to the mandate
-                (e.g. through higher vaccination coverage).
-              </p>
-            </div>
-          </div>
-
-          <div class="policy-actions">
-            <button id="resetPolicyButton" type="button" class="btn-secondary">
-              Reset to scenario defaults
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <!-- RESULTS TAB -->
-      <section id="tab-results" class="tab-panel" aria-label="Impact & support">
-        <div class="card-grid">
-          <section class="card card--wide">
-            <h2>Predicted support for this mandate</h2>
             <p>
-              For the selected country, outbreak scenario and policy configuration, the mixed logit
-              model predicts the share of respondents who would
-              <strong>support having some mandate</strong> versus those who would
-              <strong>prefer no mandate</strong>.
+                Open the full appendix in a separate window for easier reading or printing.
             </p>
-            <div class="chart-container">
-              <canvas id="supportChart" aria-label="Predicted support vs no mandate" role="img"></canvas>
-            </div>
-            <p id="supportSummaryText" class="muted">
-              Choose a country, scenario and policy design to view predicted support.
-            </p>
-          </section>
-
-          <section class="card">
-            <h3>Key indicators</h3>
-            <dl class="kpi-grid">
-              <div>
-                <dt>Support mandate</dt>
-                <dd id="supportRate">—</dd>
-              </div>
-              <div>
-                <dt>Prefer no mandate</dt>
-                <dd id="noMandateRate">—</dd>
-              </div>
-              <div>
-                <dt>Odds ratio (support vs no mandate)</dt>
-                <dd id="supportOdds">—</dd>
-              </div>
-              <div>
-                <dt>Sample size</dt>
-                <dd id="sampleSize">—</dd>
-              </div>
-            </dl>
-          </section>
-
-          <section class="card">
-            <h3>Preference segments for this scenario</h3>
-            <p>
-              The latent class model identifies mandate supporters and mandate resisters in each
-              country. Shares are based on the MandEval DCE and can be updated as new estimates
-              become available.
-            </p>
-            <ul id="segmentResultsList" class="segment-list"></ul>
-          </section>
+            <button id="open-technical-window" class="btn-secondary">Open full technical appendix</button>
+            <div id="technical-preview" class="technical-preview"></div>
         </div>
-      </section>
+    </section>
+</main>
 
-      <!-- TRADE-OFFS TAB -->
-      <section id="tab-equivalence" class="tab-panel" aria-label="Trade-offs">
-        <div class="card card--wide">
-          <h2>Trade-offs in terms of lives saved</h2>
-          <p>
-            Using the mixed logit estimates, the table below expresses each mandate attribute
-            level as an equivalent number of <strong>additional lives saved per 100&nbsp;000 people</strong>.
-            These values are based on ratios of attribute coefficients to the
-            <em>lives saved</em> coefficient.
-          </p>
-          <p class="muted">
-            For example, if “all adults” has an equivalent of 30 lives per 100&nbsp;000, the model
-            implies that moving from “high-risk groups only” to “all adults” would need to be offset
-            by saving roughly 30 extra lives per 100&nbsp;000 to keep support at the same level.
-          </p>
-          <div class="table-wrapper">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Attribute</th>
-                  <th>Level (vs reference)</th>
-                  <th>Equivalent lives saved per 100&nbsp;000<br />(95% CI)</th>
-                </tr>
-              </thead>
-              <tbody id="equivalenceTableBody">
-                <tr>
-                  <td colspan="3">Select a country and scenario to view results.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
+<!-- SNAPSHOT MODAL -->
+<div id="results-modal" class="modal hidden" aria-modal="true" role="dialog">
+    <div class="modal-content">
+        <button class="modal-close" id="close-modal" aria-label="Close snapshot">&times;</button>
+        <h2>Scenario summary</h2>
+        <div id="modal-body"></div>
+    </div>
+</div>
 
-      <!-- TECHNICAL APPENDIX TAB -->
-      <section id="tab-appendix" class="tab-panel" aria-label="Technical appendix">
-        <div class="card card--wide">
-          <h2>Technical appendix: model structure and worked example</h2>
+<!-- TOAST -->
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
-          <h3>Discrete choice model</h3>
-          <p>
-            The MandEval DCE presents respondents with repeated hypothetical choice tasks between
-            two vaccine mandate options and an explicit <strong>“no mandate”</strong> alternative.
-            Let <code>M</code> denote a mandate with attributes
-            <code>x</code> and <code>N</code> denote the no-mandate option. For the purpose
-            of this policy tool, the focus is on the binary choice between
-            <strong>some mandate</strong> and <strong>no mandate</strong>.
-          </p>
+<!-- Hidden template for full technical appendix HTML -->
+<script type="text/plain" id="technical-appendix-template">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MandEval Technical Appendix</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 24px;
+            line-height: 1.6;
+            color: #0f172a;
+        }
+        h1, h2, h3 {
+            color: #0b1120;
+        }
+        h1 { font-size: 1.8rem; margin-bottom: 0.6rem; }
+        h2 { font-size: 1.4rem; margin-top: 1.8rem; }
+        h3 { font-size: 1.15rem; margin-top: 1.2rem; }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            background: #e5e7eb;
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+        }
+        .equation {
+            font-family: "Times New Roman", serif;
+            background: #f9fafb;
+            padding: 0.5rem 0.75rem;
+            border-left: 3px solid #0ea5e9;
+            margin: 0.75rem 0;
+        }
+        ul {
+            padding-left: 1.4rem;
+        }
+        .ref-list {
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+<h1>MandEval Technical Appendix</h1>
+<p>
+    This appendix summarises how MandEval uses discrete choice experiment (DCE) estimates, willingness-to-save-lives
+    (WTS) results and simple valuation and cost assumptions to support discussions on COVID-19 vaccine mandates.
+</p>
 
-          <p>
-            For each country–scenario combination, the mixed logit model in preference space
-            can be written as:
-          </p>
-          <pre class="math">
-V<sub>Mandate</sub> = β<sub>0</sub> + β<sub>scope</sub> · Scope + β<sub>ex</sub> · Exemptions
-                     + β<sub>cov</sub> · Coverage + β<sub>life</sub> · (LivesSaved / 10)
+<h2>1. Discrete choice experiment and design</h2>
+<p>
+    The MandEval DCE was fielded in Australia, France and Italy. In each task, respondents evaluated two
+    hypothetical vaccine mandate policies (Policy A and Policy B) and a “no mandate” option. Policy alternatives
+    were defined by:
+</p>
+<ul>
+    <li>Scope of mandate (high-risk occupations only; all occupations and public spaces).</li>
+    <li>Exemption policy (medical only; medical + religious; medical + religious + personal belief).</li>
+    <li>Coverage requirement to lift the mandate (50%, 70% or 90% of the population vaccinated).</li>
+    <li>Expected lives saved per 100,000 people by introducing the mandate.</li>
+</ul>
+<p>
+    The no mandate option contained none of these attributes and was represented through an alternative-specific
+    constant. Policy A had its own alternative-specific constant, which captures left–right layout effects in
+    the survey. MandEval does not use the Policy A constant when predicting mandate support, because the decision
+    aid focuses on the comparison between “some mandate” and “no mandate”, not on left–right presentation.
+</p>
 
-V<sub>NoMandate</sub> = α<sub>No</sub>
-          </pre>
-          <p>
-            where <code>LivesSaved</code> is expressed as additional lives saved per 100&nbsp;000
-            relative to a base value (here 10 per 100&nbsp;000). The tool uses the estimated
-            coefficient on <code>LivesSaved</code> (per 10-life increment) and the
-            categorical coefficients for scope, exemptions and coverage.
-          </p>
+<h2>2. Utility specification and mixed logit model</h2>
+<p>
+    Let <em>n</em> index respondents, <em>j</em> alternatives (two mandate policies and the no mandate option)
+    and <em>t</em> choice tasks. The systematic component of utility in the mixed logit model, for mandate
+    alternatives, is:
+</p>
+<div class="equation">
+    U<sub>njt</sub> =
+    β<sub>1,n</sub> ScopeAll<sub>jt</sub> +
+    β<sub>2,n</sub> ExMedRel<sub>jt</sub> +
+    β<sub>3,n</sub> ExMedRelPers<sub>jt</sub> +
+    β<sub>4,n</sub> Cov70<sub>jt</sub> +
+    β<sub>5,n</sub> Cov90<sub>jt</sub> +
+    β<sub>6,n</sub> Lives<sub>jt</sub>.
+</div>
+<p>
+    High-risk occupations, medical-only exemptions, a 50 percent coverage threshold and the lowest lives-saved
+    value form the baseline. ScopeAll, ExMedRel, ExMedRelPers, Cov70 and Cov90 are dummy variables equal to one
+    when the alternative takes that level and zero otherwise. Lives is the number of lives saved per 100,000
+    people. The no mandate alternative has utility:
+</p>
+<div class="equation">
+    U<sub>n,NoMandate,t</sub> = α<sub>O,n</sub>,
+</div>
+<p>
+    where α<sub>O,n</sub> is the opt-out constant, capturing the average preference for “no mandate” relative to
+    a baseline mandate.
+</p>
+<p>
+    To allow for preference heterogeneity, the mixed logit assumes that the non-constant coefficients follow
+    independent normal distributions across respondents:
+</p>
+<div class="equation">
+    β<sub>k,n</sub> = \u0304β<sub>k</sub> + σ<sub>k</sub> η<sub>k,n</sub>, &nbsp; η<sub>k,n</sub> ~ N(0,1),
+</div>
+<p>
+    where \u0304β<sub>k</sub> are mean parameters and σ<sub>k</sub> capture unobserved heterogeneity. Separate models
+    are estimated for each country and for mild and severe outbreak vignettes. MandEval uses the mean coefficients
+    for prediction.
+</p>
 
-          <p>
-            The probability of supporting a mandate (aggregating over the two labelled mandate
-            options in the original design) is computed as a two-alternative logit:
-          </p>
-          <pre class="math">
-P(Support mandate) = exp(V<sub>Mandate</sub>) / [exp(V<sub>Mandate</sub>) + exp(V<sub>NoMandate</sub>)]
-P(Prefer no mandate) = 1 − P(Support mandate)
-          </pre>
+<h2>3. Latent class model: supportive and resister groups</h2>
+<p>
+    In addition to the mixed logit, a two-class latent class (LC) model is estimated for the mild outbreak
+    scenario in each country. Within each class, utilities follow the same specification as above, but with
+    class-specific parameters:
+</p>
+<div class="equation">
+    U<sub>njt | c</sub> =
+    α<sub>O,c</sub> OptOut<sub>jt</sub> +
+    β<sub>1,c</sub> ScopeAll<sub>jt</sub> +
+    β<sub>2,c</sub> ExMedRel<sub>jt</sub> +
+    β<sub>3,c</sub> ExMedRelPers<sub>jt</sub> +
+    β<sub>4,c</sub> Cov70<sub>jt</sub> +
+    β<sub>5,c</sub> Cov90<sub>jt</sub> +
+    β<sub>6,c</sub> Lives<sub>jt</sub>,
+</div>
+<p>
+    where <em>c</em> ∈ {1, 2} indexes the latent classes. Class 1 represents respondents who are generally
+    more resistant to mandates (the “resister group”), while Class 2 represents respondents who are more
+    favourable towards mandates (the “supportive group”). A class membership model relates the probability of
+    belonging to each class to socio-demographic and attitudinal covariates.
+</p>
+<p>
+    MandEval exposes both classes: the supportive group (Class 2) and the resister group (Class 1). Users can
+    select these in the Configuration tab to see how support changes among respondents who are generally
+    supportive of mandates versus those who are generally resistant. The JavaScript file contains placeholders
+    where the class-specific coefficients can be inserted.
+</p>
 
-          <h3>Coefficient mapping</h3>
-          <p>
-            In the configuration file (<code>mandeval_config.json</code>), each attribute level is linked
-            to its corresponding model coefficient via a <code>coef_key</code>. For example
-            (Australia, mild outbreak):
-          </p>
-          <pre class="code-snippet">
-"coverage": {
-  "label": "Coverage required before mandate ends",
-  "reference": "70",
-  "levels": {
-    "70": { "label": "70% of the population", "coef_key": null },
-    "80": { "label": "80% of the population", "coef_key": "coverage_80" },
-    "90": { "label": "90% of the population", "coef_key": "coverage_90" }
-  }
-},
-"lives_saved": {
-  "label": "Additional lives saved compared with no mandate",
-  "unit": "lives per 100,000 people",
-  "reference": 10,
-  "min": 10,
-  "max": 40,
-  "step": 5,
-  "coef_key": "lives_saved_10"
-}
-          </pre>
-          <p>
-            The JSON section <code>mxl.coefficients</code> then stores the mean and standard error
-            of each coefficient (to be populated with your exact estimates from the MandEval models):
-          </p>
-          <pre class="code-snippet">
-"coefficients": {
-  "asc_optout":              { "mean": -2.187, "se": 0.160 },
-  "coverage_80":             { "mean":  0.214, "se": 0.055 },
-  "coverage_90":             { "mean":  0.378, "se": 0.070 },
-  "lives_saved_10":          { "mean":  0.023, "se": 0.004 },
-  "scope_all_occupations_public": { "mean": -0.585, "se": 0.090 },
-  "scope_all_adults":        { "mean": -1.020, "se": 0.110 },
-  "exemptions_medical_religious": { "mean":  0.125, "se": 0.060 }
-}
-          </pre>
-          <p>
-            For prediction, the tool uses:
-          </p>
-          <pre class="math">
-V<sub>Mandate</sub> =
-  β<sub>scope(level)</sub> + β<sub>ex(level)</sub> + β<sub>cov(level)</sub> +
-  β<sub>life</sub> · (LivesSaved − 10)/10
+<h2>4. Willingness to save lives (WTS)</h2>
+<p>
+    The continuous lives-saved attribute allows mandate features to be expressed in units of “lives saved per
+    100,000 people”. For a linear utility function, the willingness to save lives associated with changing
+    attribute <em>k</em> from its reference level to another level is:
+</p>
+<div class="equation">
+    WTS<sub>k</sub> = - β<sub>k</sub> / β<sub>lives</sub>,
+</div>
+<p>
+    where β<sub>k</sub> is the coefficient on the attribute level and β<sub>lives</sub> is the coefficient
+    on the lives-saved attribute. WTS<sub>k</sub> measures how many lives per 100,000 respondents are willing to
+    trade to obtain (or avoid) that change in mandate design.
+</p>
+<p>
+    Positive WTS values indicate that respondents require more lives saved to accept a less preferred feature
+    (for example, a very broad scope). Negative WTS values indicate that respondents are willing to accept fewer
+    lives saved in exchange for a more preferred feature (for example, a higher coverage threshold to lift the
+    mandate).
+</p>
 
-V<sub>NoMandate</sub> = α<sub>No</sub> = asc_optout
-          </pre>
+<h2>5. From utilities to mandate support</h2>
+<p>
+    MandEval focuses on the comparison between “some vaccine mandate” and “no mandate”. For a given policy
+    configuration, define a representative mandate option with the selected attributes and a no mandate option
+    with utility α<sub>O</sub>. The difference in systematic utility between the mandate and no mandate is:
+</p>
+<div class="equation">
+    ΔV =
+    - α<sub>O</sub> +
+    β<sub>1</sub> ScopeAll +
+    β<sub>2</sub> ExMedRel +
+    β<sub>3</sub> ExMedRelPers +
+    β<sub>4</sub> Cov70 +
+    β<sub>5</sub> Cov90 +
+    β<sub>6</sub> Lives,
+</div>
+<p>
+    where each term is evaluated at the chosen levels and Lives is the selected number of lives saved per
+    100,000 people. The predicted probability that respondents support having some mandate (as opposed to no
+    mandate) is given by the standard logit formula:
+</p>
+<div class="equation">
+    P(\text{support mandate}) =
+    \frac{\exp(ΔV)}{1 + \exp(ΔV)}.
+</div>
+<p>
+    MandEval reports P(support mandate) and 1 − P(support mandate) as “Support mandate” and
+    “Prefer no mandate” in the Results tab, for the mixed logit and each latent class.
+</p>
 
-          <h3>Worked example (Australia, mild outbreak)</h3>
-          <p>
-            Suppose we consider a mandate in Australia under a mild outbreak with:
-          </p>
-          <ul>
-            <li>Scope: high-risk groups only (reference)</li>
-            <li>Exemptions: medical reasons only (reference)</li>
-            <li>Coverage threshold: 80% (vs 70% reference)</li>
-            <li>Additional lives saved: 25 per 100&nbsp;000 (vs 10 in the reference)</li>
-          </ul>
-          <p>
-            Using the illustrative coefficients above:
-          </p>
-          <pre class="math">
-β<sub>cov(80)</sub> = 0.214
-β<sub>life</sub>    = 0.023  (per 10 lives per 100,000)
-α<sub>No</sub>      = -2.187
-LivesSaved          = 25 (per 100,000)
-Reference           = 10 (per 100,000)
-          </pre>
+<h2>6. Welfare-equivalent lives saved</h2>
+<p>
+    For the chosen configuration, MandEval combines the direct lives-saved attribute and the WTS estimates to
+    obtain a welfare-equivalent number of lives saved per 100,000 people. For each non-reference attribute
+    level that is switched on in the configuration, the relevant WTS value is summed into an adjustment term:
+</p>
+<div class="equation">
+    A = \u2211 WTS<sub>k</sub>,
+</div>
+<p>
+    where positive contributions to <em>A</em> indicate that the feature makes the mandate less attractive,
+    while negative contributions indicate that it makes the mandate more attractive. The welfare-equivalent
+    lives saved per 100,000 are:
+</p>
+<div class="equation">
+    L<sup>eq</sup> = L<sup>direct</sup> - A,
+</div>
+<p>
+    where L<sup>direct</sup> is the selected lives-saved level in the configuration. A mandate with features
+    that are unpopular (for example, very broad scope combined with broad exemptions) can therefore have a
+    welfare-equivalent lives-saved value below the direct lives-saved attribute, while preferred features can
+    push the welfare-equivalent value above the direct lives saved.
+</p>
 
-          <p>
-            The mandate utility becomes:
-          </p>
-          <pre class="math">
-V<sub>Mandate</sub> =
-  0.214                                   (80% vs 70% coverage) +
-  0.023 · (25 − 10) / 10                  (extra lives saved)
-= 0.214 + 0.023 · 1.5
-= 0.214 + 0.0345
-≈ 0.249
-          </pre>
+<h2>7. From welfare-equivalent lives to monetary benefits</h2>
+<p>
+    Let L<sup>eq</sup> denote welfare-equivalent lives saved per 100,000 people and P the population covered
+    by the mandate. MandEval converts this into national lives saved as:
+</p>
+<div class="equation">
+    Lives<sup>national</sup> =
+    L<sup>eq</sup> × (P / 100,000).
+</div>
+<p>
+    Users specify an indicative value per life saved, VSL (in local currency). The total value of lives saved
+    is then:
+</p>
+<div class="equation">
+    Value = Lives<sup>national</sup> × VSL.
+</div>
+<p>
+    Implementation cost is calculated as the cost per person per year multiplied by the population covered
+    (Cost = CostPerPerson × P). Net monetary benefit and the benefit–cost ratio are:
+</p>
+<div class="equation">
+    Net benefit = Value − Cost, &nbsp;
+    BCR = Value / Cost.
+</div>
 
-          <p>
-            The no-mandate utility is:
-          </p>
-          <pre class="math">
-V<sub>NoMandate</sub> = -2.187
-          </pre>
+<h2>8. Worked example: Australia, mild outbreak</h2>
+<p>
+    This section illustrates the full chain of calculations using the Australian mixed logit estimates for a
+    mild outbreak. Coefficients are taken directly from the model used in the tool.
+</p>
+<h3>8.1. Configuration</h3>
+<ul>
+    <li>Country: Australia; scenario: mild outbreak.</li>
+    <li>Scope: all occupations and public spaces (ScopeAll = 1).</li>
+    <li>Exemptions: medical + religious (ExMedRel = 1; ExMedRelPers = 0).</li>
+    <li>Coverage threshold: 70% (Cov70 = 1; Cov90 = 0).</li>
+    <li>Lives saved attribute: 25 lives per 100,000 (Lives = 25).</li>
+    <li>Population covered: 25 million people.</li>
+    <li>Implementation cost per person: 20 units of local currency.</li>
+    <li>Value per life saved (VSL): 5,000,000 units of local currency.</li>
+</ul>
 
-          <p>
-            The resulting probabilities are:
-          </p>
-          <pre class="math">
-P(Support mandate)   = exp(0.249) / [exp(0.249) + exp(-2.187)]
-                     ≈ 0.92
+<h3>8.2. From coefficients to support for a mandate</h3>
+<p>
+    For the Australian mild-outbreak mixed logit, the mean coefficients are:
+</p>
+<ul>
+    <li>Opt-out constant: α<sub>O</sub> = −0.572.</li>
+    <li>ScopeAll: β<sub>scopeAll</sub> = −0.319.</li>
+    <li>ExMedRel: β<sub>ExMedRel</sub> = −0.157.</li>
+    <li>Cov70: β<sub>Cov70</sub> = 0.171.</li>
+    <li>Lives: β<sub>Lives</sub> = 0.072.</li>
+</ul>
+<p>
+    The difference in utility between “some mandate” and “no mandate” for this configuration is:
+</p>
+<div class="equation">
+    ΔV = -α<sub>O</sub> +
+    β<sub>scopeAll</sub> +
+    β<sub>ExMedRel</sub> +
+    β<sub>Cov70</sub> +
+    β<sub>Lives</sub> × Lives.
+</div>
+<p>
+    Substituting the numbers:
+</p>
+<div class="equation">
+    ΔV = 0.572 + (-0.319) + (-0.157) + 0.171 + 0.072 × 25
+        ≈ 0.572 - 0.319 - 0.157 + 0.171 + 1.800
+        ≈ 2.07.
+</div>
+<p>
+    The predicted probability of supporting a mandate is:
+</p>
+<div class="equation">
+    P(\text{support mandate}) =
+    \frac{\exp(2.07)}{1 + \exp(2.07)} ≈ 0.89,
+</div>
+<p>
+    so around 89 percent support having some mandate in this configuration, and 11 percent prefer no mandate.
+    These are the values shown in the Results tab under “Support mandate” and “Prefer no mandate”.
+</p>
 
-P(Prefer no mandate) = 1 − 0.92
-                     ≈ 0.08
-          </pre>
+<h3>8.3. Welfare-equivalent lives saved per 100,000</h3>
+<p>
+    For the same configuration, the WTS table for Australia, mild outbreak, gives:
+</p>
+<ul>
+    <li>WTS for ScopeAll: WTS<sub>scopeAll</sub> = 4.421.</li>
+    <li>WTS for ExMedRel: WTS<sub>ExMedRel</sub> = 2.171.</li>
+    <li>WTS for Cov70: WTS<sub>Cov70</sub> = −2.365.</li>
+</ul>
+<p>
+    Because ExMedRelPers and Cov90 are not selected, their WTS values are zero in this configuration. The total
+    adjustment term is:
+</p>
+<div class="equation">
+    A = 4.421 + 2.171 - 2.365 ≈ 4.23 \text{ lives per 100,000}.
+</div>
+<p>
+    With a direct lives-saved attribute of 25 per 100,000, the welfare-equivalent lives saved per 100,000 are:
+</p>
+<div class="equation">
+    L<sup>eq</sup> = 25 - 4.23 ≈ 20.8 \text{ lives per 100,000}.
+</div>
+<p>
+    In other words, taking into account how respondents value scope, exemptions and coverage, the mandate is
+    valued as if it saved roughly 21 lives per 100,000, even though the direct epidemiological attribute is set
+    to 25 lives saved.
+</p>
 
-          <p>
-            The tool implements this calculation generically for any combination of scope,
-            exemptions, coverage and lives-saved levels, using the country- and
-            scenario-specific coefficients from <code>mandeval_config.json</code>.
-            To use the exact MandEval results, replace the illustrative coefficient values in
-            the JSON file with the estimates from your final mixed logit and latent class models.
-          </p>
+<h3>8.4. National lives saved and monetary values</h3>
+<p>
+    With L<sup>eq</sup> ≈ 20.8 lives per 100,000 and a covered population of 25 million, national lives saved
+    are:
+</p>
+<div class="equation">
+    Lives<sup>national</sup> =
+    20.8 × (25,000,000 / 100,000) ≈ 20.8 × 250 ≈ 5,200 \text{ lives}.
+</div>
+<p>
+    Using a value per life saved of 5,000,000, the value of lives saved is:
+</p>
+<div class="equation">
+    Value ≈ 5,200 × 5,000,000 ≈ 26 \text{ billion (local currency units)}.
+</div>
+<p>
+    Implementation cost is 20 per person for 25 million people:
+</p>
+<div class="equation">
+    Cost = 20 × 25,000,000 = 500,000,000.
+</div>
+<p>
+    Net monetary benefit and the benefit–cost ratio are therefore:
+</p>
+<div class="equation">
+    Net benefit ≈ 26,000,000,000 - 500,000,000 ≈ 25,500,000,000, \\
+    BCR ≈ 26,000,000,000 / 500,000,000 ≈ 52.
+</div>
+<p>
+    These values (rounded to the nearest integer) are the ones displayed in the National impact and National
+    simulation tabs when the same configuration and assumptions are entered in the tool.
+</p>
 
-          <h3>Trade-offs in lives saved</h3>
-          <p>
-            For each non-reference level of scope, exemptions and coverage, the tool reports the
-            number of extra lives saved per 100&nbsp;000 that would compensate for that level,
-            holding overall support constant. For an attribute level with coefficient
-            <code>β<sub>j</sub></code> and a lives-saved coefficient
-            <code>β<sub>life</sub></code> (per 10 lives), the equivalent lives saved is:
-          </p>
-          <pre class="math">
-LivesEquivalent<sub>j</sub> =
-  (β<sub>j</sub> / β<sub>life</sub>) · 10   (lives per 100,000)
-          </pre>
-          <p>
-            Approximate 95% confidence intervals are computed using the delta method, assuming
-            independence between coefficients:
-          </p>
-          <pre class="math">
-Var(β<sub>j</sub> / β<sub>life</sub>) ≈ (σ<sub>j</sub> / β<sub>j</sub>)²
-                                      + (σ<sub>life</sub> / β<sub>life</sub>)²
+<h2>9. Interpretation and recommended use</h2>
+<p>
+    MandEval is a decision aid rather than a full transmission or economic model. It is built to:
+</p>
+<ul>
+    <li>Make the consequences of mandate design choices transparent in terms of public support.</li>
+    <li>Show how different designs map into welfare-equivalent lives saved using WTS estimates.</li>
+    <li>Allow rapid exploration of simple cost and valuation assumptions for briefing purposes.</li>
+</ul>
+<p>
+    For major policy decisions, MandEval outputs should be combined with detailed epidemiological modelling,
+    richer costing exercises and broader ethical and legal considerations. The DCE evidence is intended to
+    complement, not replace, other sources of information in vaccine mandate debates.
+</p>
 
-SE(ratio) = |β<sub>j</sub> / β<sub>life</sub>| · √Var(·)
+<h2>10. Authorship and contact</h2>
+<p>
+    MandEval and this technical appendix were prepared by Mesfin Genie, Newcastle Business School, The
+    University of Newcastle, Australia. For technical questions or to adapt the tool for other settings,
+    please contact <a href="mailto:mesfin.genie@newcastle.edu.au">mesfin.genie@newcastle.edu.au</a>.
+</p>
+</body>
+</html>
+</script>
 
-CI<sub>ratio</sub> = (β<sub>j</sub> / β<sub>life</sub>) ± 1.96 · SE(ratio)
-
-CI<sub>Lives</sub> = CI<sub>ratio</sub> · 10
-          </pre>
-        </div>
-      </section>
-
-      <!-- METHODS TAB -->
-      <section id="tab-methods" class="tab-panel" aria-label="Methods & data">
-        <div class="card card--wide">
-          <h2>Methods &amp; data</h2>
-          <p>
-            The tool is calibrated to the MandEval discrete choice experiment on public preferences
-            for COVID-19 vaccine mandates conducted in Australia, Italy and France. Respondents
-            completed repeated choice tasks in which they selected between two mandate options and
-            an explicit “no mandate” alternative under mild and severe outbreak scenarios.
-          </p>
-          <p>
-            Model estimates are based on mixed logit specifications in preference space with
-            respondent-clustered standard errors. The coefficient on additional lives saved is
-            treated as a continuous attribute; scope, exemptions and coverage thresholds are
-            modelled as categorical attributes with clearly defined reference levels.
-          </p>
-          <p>
-            In addition, a latent class logit model identifies at least two preference segments:
-            a majority mandate-supporter class and a smaller mandate-resister class. Segment
-            shares for each country and scenario are stored in <code>lc_segments</code> within
-            <code>mandeval_config.json</code> and are displayed in the
-            <strong>Overview</strong> and <strong>Impact &amp; support</strong> tabs.
-          </p>
-          <p>
-            The current implementation uses the <strong>mean coefficients</strong> from the mixed
-            logit models to generate point predictions for mandate support. To ensure numerical
-            accuracy for your application, paste the final MandEval estimates (means, standard
-            errors and class shares) into <code>mandeval_config.json</code> for each
-            country–scenario combination.
-          </p>
-        </div>
-      </section>
-    </main>
-
-    <footer class="app-footer">
-      <p>MandEval Vaccine Mandate Policy Tool &middot; Version 1.1</p>
-    </footer>
-  </div>
-
-  <script src="app.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
