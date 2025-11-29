@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "countries": {
+    "australia": {
+      "display_name": "Australia",
+      "local_currency": "AUD"
+    },
+    "france": {
+      "display_name": "France",
+      "local_currency": "EUR"
+    },
+    "italy": {
+      "display_name": "Italy",
+      "local_currency": "EUR"
+    }
+  }
+}
