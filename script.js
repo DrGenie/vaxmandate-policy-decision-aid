@@ -1,5 +1,5 @@
 /* script.js */
-/* global Charts, jspdf, XLSX */
+/* global Charts, jspdfs, XLSX */
 (() => {
     const { jsPDF } = window.jspdf || {};
 
