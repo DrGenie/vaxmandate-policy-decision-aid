@@ -1,4 +1,4 @@
-/* styles.cssss */
+/* styles.css */
 :root {
     --bg-main: #020617;
     --bg-card: #020617;
@@ -371,7 +371,7 @@ input[type="range"] {
     background: rgba(15, 23, 42, 0.95);
 }
 
-/* Switch pill (retained for consistency) */
+/* Switch pill (not used but retained for consistency) */
 
 .switch-pill {
     position: relative;
