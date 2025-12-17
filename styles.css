@@ -33,14 +33,6 @@ body {
     min-height: 100vh;
 }
 
-button:focus-visible,
-select:focus-visible,
-input:focus-visible,
-textarea:focus-visible {
-    outline: 2px solid var(--accent-soft);
-    outline-offset: 2px;
-}
-
 .app-header {
     display: flex;
     justify-content: space-between;
@@ -137,11 +129,7 @@ textarea:focus-visible {
     background: transparent;
     color: var(--text-muted);
     cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.tab-link:hover {
-    color: #e5f3ff;
+    transition: background 0.15s ease, color 0.15s ease;
 }
 
 .tab-link.active {
@@ -383,7 +371,7 @@ input[type="range"] {
     background: rgba(15, 23, 42, 0.95);
 }
 
-/* Switch pill (not currently used but retained for consistency) */
+/* Switch pill (retained for consistency) */
 
 .switch-pill {
     position: relative;
