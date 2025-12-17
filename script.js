@@ -9,18 +9,12 @@
         italy: "EUR"
     };
 
-    const MANDEVAL_CONFIG_URL = "mandeval_config.json";
-    const EPI_CONFIG_URL = "epi_config.json";
-
     let LOCAL_PER_USD_DEFAULT = 1.5;
     let LOCAL_PER_USD = LOCAL_PER_USD_DEFAULT;
 
-    // Runtime parameter tables populated from mandeval_config.json
-    let DCE_PARAMS_MXL = {};
-    let WTS_TABLE = {};
-
-    // Legacy hard-coded mixed logit parameters (used only if config file is unavailable)
-    const LEGACY_DCE_PARAMS_MXL = {
+    // Mixed logit parameters by country and outbreak scenario (means or average)
+    // Keys are "<country>_<scenario>"
+    const DCE_PARAMS_MXL = {
         australia_mild: {
             label: "Australia – mild outbreak",
             asc_optout: -0.572,
@@ -51,7 +45,7 @@
             beta: {
                 scope_all: -0.276,
                 ex_medRelig: -0.176,
-                ex_medReligPers: -0.289,
+                ex_medReligPers: -0289,
                 cov70: 0.185,
                 cov90: 0.148,
                 lives: 0.039
@@ -95,8 +89,8 @@
         }
     };
 
-    // Legacy willingness-to-save-lives table (used only if config file is unavailable)
-    const LEGACY_WTS_TABLE = {
+    // Willingness-to-save-lives (WTS) in lives per 100,000
+    const WTS_TABLE = {
         australia_mild: {
             scope_all: 4.421,
             ex_medRelig: 2.171,
@@ -141,59 +135,9 @@
         }
     };
 
-    // Latent class "supportive" (Class 2) parameters (legacy, used for supportive group option)
-    const DCE_PARAMS_LC2_BASE = {
-        australia_mild: {
-            label: "Australia – supportive group (mild)",
-            asc_optout: -1.01,
-            beta: {
-                scope_all: -0.19,
-                ex_medRelig: -0.18,
-                ex_medReligPers: -0.21,
-                cov70: 0.10,
-                cov90: 0.17,
-                lives: 0.04
-            }
-        },
-        italy_mild: {
-            label: "Italy – supportive group (mild)",
-            asc_optout: -0.96,
-            beta: {
-                scope_all: -0.18,
-                ex_medRelig: -0.14,
-                ex_medReligPers: -0.24,
-                cov70: 0.13,
-                cov90: 0.18,
-                lives: 0.03
-            }
-        },
-        france_mild: {
-            label: "France – supportive group (mild)",
-            asc_optout: -0.68,
-            beta: {
-                scope_all: -0.11,
-                ex_medRelig: -0.16,
-                ex_medReligPers: -0.15,
-                cov70: 0.12,
-                cov90: 0.19,
-                lives: 0.03
-            }
-        }
-    };
-
-    // Build LC2 table with mild parameters used for severe as well
-    const DCE_PARAMS_LC2 = {
-        australia_mild: DCE_PARAMS_LC2_BASE.australia_mild,
-        australia_severe: DCE_PARAMS_LC2_BASE.australia_mild,
-        italy_mild: DCE_PARAMS_LC2_BASE.italy_mild,
-        italy_severe: DCE_PARAMS_LC2_BASE.italy_mild,
-        france_mild: DCE_PARAMS_LC2_BASE.france_mild,
-        france_severe: DCE_PARAMS_LC2_BASE.france_mild
-    };
-
-    // Optional external configuration objects
+    // Placeholder for optional external configuration (not yet used in calculations)
+    const EPI_CONFIG_URL = "epi_config.json";
     let epiConfig = null;
-    let mandevalConfig = null;
 
     const state = {
         tab: "intro",
@@ -201,12 +145,12 @@
         outbreak: "mild",
         scope: "high_risk",
         exemptions: "medical",
-        coverage: "70",
+        coverage: "50",
         livesSaved: 25,
         populationMillions: 25,
         costPerPerson: 20,
         valuePerLife: 5000000,
-        modelKey: "mxl", // 'mxl' or 'lc2'
+        modelKey: "mxl", // retained for labelling, calculations always use mixed logit
         currency: "LOCAL", // 'LOCAL' or 'USD'
         scenarioName: "",
         scenarioNotes: "",
@@ -296,27 +240,12 @@
 
     function getActiveParams() {
         const key = getDceKey();
-
-        if (state.modelKey === "lc2") {
-            let params = DCE_PARAMS_LC2[key];
-            if (!params) {
-                const fallbackKey = state.country + "_mild";
-                params = DCE_PARAMS_LC2[fallbackKey];
-            }
-            return params || null;
-        }
-
         let params = DCE_PARAMS_MXL[key];
         if (!params) {
-            params = LEGACY_DCE_PARAMS_MXL[key];
-        }
-        if (!params) {
             const fallbackKey = state.country + "_mild";
-            params =
-                DCE_PARAMS_MXL[fallbackKey] ||
-                LEGACY_DCE_PARAMS_MXL[fallbackKey];
+            params = DCE_PARAMS_MXL[fallbackKey];
         }
-        return params || null;
+        return params;
     }
 
     // Core calculations
@@ -327,46 +256,18 @@
             return { deltaV: NaN, support: NaN, optout: NaN };
         }
 
-        const b = params.beta || {};
+        const b = params.beta;
         let attrSum = 0;
 
-        if (state.scope === "all" && Number.isFinite(b.scope_all)) {
-            attrSum += b.scope_all;
-        }
+        if (state.scope === "all") attrSum += b.scope_all;
 
-        if (state.exemptions === "med_relig" && Number.isFinite(b.ex_medRelig)) {
-            attrSum += b.ex_medRelig;
-        } else if (
-            state.exemptions === "med_rel_pers" &&
-            Number.isFinite(b.ex_medReligPers)
-        ) {
-            attrSum += b.ex_medReligPers;
-        }
+        if (state.exemptions === "med_relig") attrSum += b.ex_medRelig;
+        else if (state.exemptions === "med_rel_pers") attrSum += b.ex_medReligPers;
 
-        if (state.coverage === "80") {
-            if (Number.isFinite(b.cov80)) {
-                attrSum += b.cov80;
-            } else if (Number.isFinite(b.cov70)) {
-                // Legacy mapping if only 70% coefficient exists
-                attrSum += b.cov70;
-            }
-        } else if (state.coverage === "90") {
-            if (Number.isFinite(b.cov90)) {
-                attrSum += b.cov90;
-            }
-        } else if (state.coverage === "70") {
-            if (Number.isFinite(b.cov70)) {
-                attrSum += b.cov70;
-            }
-        }
+        if (state.coverage === "70") attrSum += b.cov70;
+        else if (state.coverage === "90") attrSum += b.cov90;
 
-        if (Number.isFinite(b.lives10)) {
-            // lives10 is coded per 10 lives in the config
-            attrSum += b.lives10 * (state.livesSaved / 10);
-        } else if (Number.isFinite(b.lives)) {
-            // legacy per 1 life coding
-            attrSum += b.lives * state.livesSaved;
-        }
+        attrSum += b.lives * state.livesSaved;
 
         const baseline = -params.asc_optout;
         const deltaV = baseline + attrSum;
@@ -378,10 +279,7 @@
 
     function computeEquivalentLives() {
         const key = getDceKey();
-        const table =
-            WTS_TABLE[key] ||
-            LEGACY_WTS_TABLE[key] ||
-            null;
+        const table = WTS_TABLE[key] || null;
 
         let adjustment = 0;
 
@@ -389,32 +287,15 @@
             if (state.scope === "all" && Number.isFinite(table.scope_all)) {
                 adjustment += table.scope_all;
             }
-            if (
-                state.exemptions === "med_relig" &&
-                Number.isFinite(table.ex_medRelig)
-            ) {
+            if (state.exemptions === "med_relig" && Number.isFinite(table.ex_medRelig)) {
                 adjustment += table.ex_medRelig;
-            } else if (
-                state.exemptions === "med_rel_pers" &&
-                Number.isFinite(table.ex_medReligPers)
-            ) {
+            } else if (state.exemptions === "med_rel_pers" && Number.isFinite(table.ex_medReligPers)) {
                 adjustment += table.ex_medReligPers;
             }
-
-            if (state.coverage === "80") {
-                if (Number.isFinite(table.cov80)) {
-                    adjustment += table.cov80;
-                } else if (Number.isFinite(table.cov70)) {
-                    adjustment += table.cov70;
-                }
-            } else if (state.coverage === "90") {
-                if (Number.isFinite(table.cov90)) {
-                    adjustment += table.cov90;
-                }
-            } else if (state.coverage === "70") {
-                if (Number.isFinite(table.cov70)) {
-                    adjustment += table.cov70;
-                }
+            if (state.coverage === "70" && Number.isFinite(table.cov70)) {
+                adjustment += table.cov70;
+            } else if (state.coverage === "90" && Number.isFinite(table.cov90)) {
+                adjustment += table.cov90;
             }
         }
 
@@ -474,10 +355,7 @@
         const el = document.getElementById("config-summary");
         if (!el) return;
 
-        const modelLabel =
-            state.modelKey === "mxl"
-                ? "Average mixed logit"
-                : "Supportive group (latent class)";
+        const modelLabel = "Average mixed logit";
 
         el.innerHTML = `
             <div><span>Country</span><br><strong>${formatCountry()}</strong></div>
@@ -579,6 +457,7 @@
                 : "-";
         }
 
+        // Impact tab mirrors some of these values
         const impactPop = document.getElementById("impact-population");
         const impactCpp = document.getElementById("impact-cost-per-person");
         const impactVpl = document.getElementById("impact-value-per-life");
@@ -659,7 +538,7 @@
             state.charts.bcr = new Chart(ctx, {
                 type: "bar",
                 data: {
-                    labels: ["Benefit–cost ratio"],
+                    labels: ["Benefit cost ratio"],
                     datasets: [
                         {
                             data: [Number.isFinite(outputs.bcr) ? outputs.bcr : 0]
@@ -703,10 +582,7 @@
         const body = document.getElementById("modal-body");
         if (!modal || !body || !outputs) return;
 
-        const modelLabel =
-            state.modelKey === "mxl"
-                ? "Average mixed logit"
-                : "Supportive group (latent class)";
+        const modelLabel = "Average mixed logit";
 
         body.innerHTML = `
             <p><strong>Scenario:</strong> ${
@@ -777,10 +653,7 @@
     function saveScenario(outputs) {
         if (!outputs) return;
 
-        const modelLabel =
-            state.modelKey === "mxl"
-                ? "Average mixed logit"
-                : "Supportive group (latent class)";
+        const modelLabel = "Average mixed logit";
 
         const row = {
             name:
@@ -802,6 +675,7 @@
 
         state.savedScenarios.push(row);
         renderScenarioTable();
+        refreshCopilotPanel();
     }
 
     function renderScenarioTable() {
@@ -866,7 +740,7 @@
                 "Equiv. lives (per 100k)",
                 "Preference model",
                 "Support mandate",
-                "Benefit–cost ratio",
+                "Benefit cost ratio",
                 "Net benefit (local currency)",
                 "Notes"
             ]
@@ -979,7 +853,7 @@
                 )}; welfare-equivalent (per 100k): ${s.equivLivesPer100k.toFixed(
                     1
                 )}.\n` +
-                `Support mandate: ${supportPct} percent; benefit–cost ratio: ${bcrText}.\n` +
+                `Support mandate: ${supportPct} percent; benefit cost ratio: ${bcrText}.\n` +
                 `Net benefit (local currency): ${Math.round(
                     s.netBenefit
                 ).toLocaleString("en-US")}.\n` +
@@ -998,10 +872,10 @@
         const preview = document.getElementById("technical-preview");
         if (!preview) return;
         preview.innerHTML =
-            "<p>This appendix sets out the mixed logit and latent class models, " +
+            "<p>This appendix sets out the mixed logit model, " +
             "the willingness-to-save-lives calculations and the simple cost–benefit " +
             "framework used in MandEval. Worked examples illustrate how support, " +
-            "welfare-equivalent lives saved and benefit–cost ratios are derived.</p>";
+            "welfare-equivalent lives saved and benefit cost ratios are derived.</p>";
     }
 
     function openTechnicalWindow() {
@@ -1049,130 +923,110 @@
             })
             .then(json => {
                 epiConfig = json;
-                // Reserved for future epidemiological extensions
+                showToast("External epi_config.json loaded (reserved for future extensions).");
             })
             .catch(() => {
                 epiConfig = null;
             });
     }
 
-    // MandEval configuration (DCE parameters and WTS)
+    // Copilot prompt
 
-    function buildMandEvalTablesFromConfig() {
-        if (!mandevalConfig || !mandevalConfig.countries) {
-            return;
-        }
+    function buildCopilotPrompt() {
+        const outputs = state.latestOutputs || computeOutputs();
 
-        DCE_PARAMS_MXL = {};
-        WTS_TABLE = {};
+        const primaryConfiguration = {
+            name: state.scenarioName || "Current configuration",
+            country: formatCountry(),
+            outbreak: formatOutbreak(),
+            scope: formatScope(),
+            exemptions: formatExemptions(),
+            coverage_threshold_percent: Number(state.coverage),
+            lives_saved_attribute_per_100k: state.livesSaved,
+            welfare_equivalent_lives_saved_per_100k: outputs.eqLivesPer100k,
+            support_mandate_fraction: outputs.support,
+            prefer_no_mandate_fraction: outputs.optout,
+            population_millions: state.populationMillions,
+            cost_per_person_local_currency: state.costPerPerson,
+            value_per_life_local_currency: state.valuePerLife,
+            total_welfare_equivalent_lives_saved_national: outputs.totalLives,
+            total_value_of_lives_saved_local_currency: outputs.valueLives,
+            total_implementation_cost_local_currency: outputs.cost,
+            net_monetary_benefit_local_currency: outputs.netBenefit,
+            benefit_cost_ratio: outputs.bcr
+        };
 
-        const countries = mandevalConfig.countries;
-        Object.keys(countries).forEach(countryKey => {
-            const country = countries[countryKey];
-            const scenarios = country.scenarios || {};
-            Object.keys(scenarios).forEach(scenKey => {
-                const scen = scenarios[scenKey];
-                const mxl = scen.mxl || {};
-                const coeffs = mxl.coefficients || {};
-                const wtsJson = scen.wts || {};
-                const dceKey = countryKey + "_" + scenKey;
+        const savedScenarios = state.savedScenarios.map((s, idx) => ({
+            id: idx + 1,
+            name: s.name,
+            country: s.country,
+            outbreak: s.outbreak,
+            scope: s.scope,
+            exemptions: s.exemptions,
+            coverage: s.coverage,
+            lives_saved_per_100k: s.livesPer100k,
+            welfare_equivalent_lives_saved_per_100k: s.equivLivesPer100k,
+            support_mandate_fraction: s.support,
+            benefit_cost_ratio: s.bcr,
+            net_monetary_benefit_local_currency: s.netBenefit,
+            preference_model: s.modelLabel,
+            notes: s.notes
+        }));
 
-                const beta = {
-                    scope_all:
-                        coeffs.scope_all_occupations_public &&
-                        Number.isFinite(coeffs.scope_all_occupations_public.mean)
-                            ? coeffs.scope_all_occupations_public.mean
-                            : 0,
-                    ex_medRelig:
-                        coeffs.exemptions_medical_religious &&
-                        Number.isFinite(coeffs.exemptions_medical_religious.mean)
-                            ? coeffs.exemptions_medical_religious.mean
-                            : 0,
-                    ex_medReligPers:
-                        coeffs.exemptions_medical_religious_personal &&
-                        Number.isFinite(
-                            coeffs.exemptions_medical_religious_personal.mean
-                        )
-                            ? coeffs.exemptions_medical_religious_personal.mean
-                            : 0,
-                    cov80:
-                        coeffs.coverage_80 &&
-                        Number.isFinite(coeffs.coverage_80.mean)
-                            ? coeffs.coverage_80.mean
-                            : 0,
-                    cov90:
-                        coeffs.coverage_90 &&
-                        Number.isFinite(coeffs.coverage_90.mean)
-                            ? coeffs.coverage_90.mean
-                            : 0,
-                    lives10:
-                        coeffs.lives_saved_10 &&
-                        Number.isFinite(coeffs.lives_saved_10.mean)
-                            ? coeffs.lives_saved_10.mean
-                            : 0
-                };
+        const payload = {
+            tool_name: "MandEval vaccine mandate decision aid",
+            purpose: "Use MandEval outputs to prepare a clear, non-technical policy brief on COVID-19 vaccine mandates.",
+            instructions_for_copilot:
+                "Using the configuration and scenarios below, write a structured 3–5 page policy brief for public health and government stakeholders. " +
+                "Explain clearly: (1) context and objectives of vaccine mandates; (2) description of the main configuration and any comparator scenarios; " +
+                "(3) predicted public support; (4) welfare-equivalent lives saved; (5) national costs, benefits, net monetary benefits and benefit cost ratios; " +
+                "and (6) key trade-offs and recommendations. Use plain language and avoid technical econometric jargon.",
+            primary_configuration: primaryConfiguration,
+            saved_scenarios: savedScenarios,
+            notes_from_user: state.scenarioNotes || ""
+        };
 
-                DCE_PARAMS_MXL[dceKey] = {
-                    label: `${country.label} – ${scen.label.toLowerCase()}`,
-                    asc_optout:
-                        coeffs.asc_optout &&
-                        Number.isFinite(coeffs.asc_optout.mean)
-                            ? coeffs.asc_optout.mean
-                            : 0,
-                    beta
-                };
-
-                WTS_TABLE[dceKey] = {
-                    scope_all:
-                        wtsJson.scope_all_occupations_public &&
-                        Number.isFinite(wtsJson.scope_all_occupations_public.mean)
-                            ? wtsJson.scope_all_occupations_public.mean
-                            : 0,
-                    ex_medRelig:
-                        wtsJson.exemptions_medical_religious &&
-                        Number.isFinite(
-                            wtsJson.exemptions_medical_religious.mean
-                        )
-                            ? wtsJson.exemptions_medical_religious.mean
-                            : 0,
-                    ex_medReligPers:
-                        wtsJson.exemptions_medical_religious_personal &&
-                        Number.isFinite(
-                            wtsJson.exemptions_medical_religious_personal.mean
-                        )
-                            ? wtsJson.exemptions_medical_religious_personal.mean
-                            : 0,
-                    cov80:
-                        wtsJson.coverage_80 &&
-                        Number.isFinite(wtsJson.coverage_80.mean)
-                            ? wtsJson.coverage_80.mean
-                            : 0,
-                    cov90:
-                        wtsJson.coverage_90 &&
-                        Number.isFinite(wtsJson.coverage_90.mean)
-                            ? wtsJson.coverage_90.mean
-                            : 0
-                };
-            });
-        });
+        return JSON.stringify(payload, null, 2);
     }
 
-    function loadMandEvalConfig() {
-        return fetch(MANDEVAL_CONFIG_URL)
-            .then(resp => {
-                if (!resp.ok) throw new Error("No mandeval_config");
-                return resp.json();
-            })
-            .then(json => {
-                mandevalConfig = json;
-                buildMandEvalTablesFromConfig();
-            })
-            .catch(() => {
-                mandevalConfig = null;
-                // Fallback to legacy hard-coded parameters if config not available
-                DCE_PARAMS_MXL = { ...LEGACY_DCE_PARAMS_MXL };
-                WTS_TABLE = { ...LEGACY_WTS_TABLE };
-            });
+    function refreshCopilotPanel() {
+        const panel = document.getElementById("copilot-prompt-panel");
+        if (!panel) return;
+        const promptText = buildCopilotPrompt();
+        panel.value = promptText;
+    }
+
+    function openCopilotAndCopy() {
+        const promptText = buildCopilotPrompt();
+        const panel = document.getElementById("copilot-prompt-panel");
+        if (panel) {
+            panel.value = promptText;
+        }
+
+        const copyFallback = () => {
+            if (!panel) return;
+            panel.focus();
+            panel.select();
+            try {
+                document.execCommand("copy");
+                showToast("Prompt copied. A new Copilot tab should now be open.");
+            } catch (e) {
+                showToast("Copy may have failed. You can copy the prompt manually.");
+            }
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard
+                .writeText(promptText)
+                .then(() => {
+                    showToast("Prompt copied. A new Copilot tab should now be open.");
+                })
+                .catch(copyFallback);
+        } else {
+            copyFallback();
+        }
+
+        window.open("https://copilot.microsoft.com", "_blank");
     }
 
     // Events
@@ -1287,27 +1141,16 @@
         if (nameInput) {
             nameInput.addEventListener("input", e => {
                 state.scenarioName = e.target.value;
+                refreshCopilotPanel();
             });
         }
 
         if (notesInput) {
             notesInput.addEventListener("input", e => {
                 state.scenarioNotes = e.target.value;
+                refreshCopilotPanel();
             });
         }
-
-        // Model toggle
-        document.querySelectorAll(".pill-toggle[data-model]").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const modelKey = btn.getAttribute("data-model");
-                state.modelKey = modelKey;
-                document
-                    .querySelectorAll(".pill-toggle[data-model]")
-                    .forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                rerun();
-            });
-        });
 
         // Currency toggle
         document.querySelectorAll(".pill-toggle[data-currency]").forEach(btn => {
@@ -1334,6 +1177,7 @@
         const techBtn = document.getElementById("open-technical-window");
         const advApplyBtn = document.getElementById("advanced-apply");
         const advResetBtn = document.getElementById("advanced-reset");
+        const copilotBtn = document.getElementById("copilot-open-and-copy-btn");
 
         if (applyBtn) {
             applyBtn.addEventListener("click", () => {
@@ -1351,8 +1195,8 @@
                     document
                         .querySelectorAll(".tab-link")
                         .forEach(b => b.classList.remove("active"));
-                    const btn = document.querySelector('[data-tab="results"]');
-                    if (btn) btn.classList.add("active");
+                    const btnRes = document.querySelector('[data-tab="results"]');
+                    if (btnRes) btnRes.classList.add("active");
                     document.querySelectorAll(".tab-panel").forEach(panel => {
                         panel.classList.toggle(
                             "active",
@@ -1412,6 +1256,13 @@
                 resetAdvancedSettings();
             });
         }
+
+        if (copilotBtn) {
+            copilotBtn.addEventListener("click", e => {
+                e.preventDefault();
+                openCopilotAndCopy();
+            });
+        }
     }
 
     // Main rerun
@@ -1425,6 +1276,7 @@
         updateCharts(outputs);
         updateHeadline(outputs);
         updateNationalSimulation(outputs);
+        refreshCopilotPanel();
     }
 
     function init() {
@@ -1439,8 +1291,6 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         attachEvents();
-        loadMandEvalConfig().then(() => {
-            init();
-        });
+        init();
     });
 })();
